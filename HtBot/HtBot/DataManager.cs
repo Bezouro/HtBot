@@ -407,7 +407,8 @@ namespace MinecraftClient.HtBot
         {
 
             DateTime dt = DateTime.Now;
-            string Timeonly = dt.ToLongTimeString();
+            string date = DateTime.Today.ToString("dd/MM");
+            string Time = dt.ToLongTimeString();
 
             try
             {
@@ -427,7 +428,7 @@ namespace MinecraftClient.HtBot
                         if (Nick.ToLower().Equals(nick.ToLower()))
                         {
                             JArray notifications = (JArray)parsingAccount["notifications"];
-                            notifications.Add(Timeonly + " - " + notify);
+                            notifications.Add("<b>[" + date + " " + Time + "]</b> " + notify);
                             WriteData();
                             break;
                         }
@@ -546,6 +547,8 @@ namespace MinecraftClient.HtBot
                             string conta = (string)acc["nick"];
                             JArray notifications = (JArray)acc["notifications"];
                             foundmessage = false;
+                            string accMsgs = "<code>" + conta + "</code>: %0A";
+
 
                             foreach (JValue notification in notifications)
                             {
@@ -558,6 +561,12 @@ namespace MinecraftClient.HtBot
                                         foundmessage = true;
                                     }
                                 }
+                                else {
+                                    if (Notification != null)
+                                    {
+                                        foundmessage = true;
+                                    }
+                                }
                                 string type = null;
 
                                 if (true)
@@ -565,13 +574,12 @@ namespace MinecraftClient.HtBot
                                     type = "  ✅ ";
                                 }
 
-                                string msg = type + notification + " - <code>" + conta + "</code>";
-                                reply = reply + msg + "%0A";
+                                accMsgs = accMsgs + "   " + notification + "%0A";
 
                             }
 
                             if (foundmessage) {
-                                reply = conta + ": %0A" + reply;
+                                reply = reply + accMsgs;
                             }
 
                         }

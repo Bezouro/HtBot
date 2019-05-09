@@ -226,7 +226,7 @@ namespace MinecraftClient.HtBot
                 int nivel = int.Parse(notificação.Groups[2].Value);
                 string skill = notificação.Groups[3].Value;
 
-                Telegram.data.addNotification(nick, "Alcançou " + nivel + " na skill: " + skill);
+                Telegram.data.addNotification(nick, "<i>Alcançou</i> <code>" + nivel + "</code> <i>na skill:</i> <code>" + skill + "</code>");
 
 
             }

@@ -162,7 +162,7 @@ namespace MinecraftClient.HtBot
                     }
 
                     vars.tmoney = true;
-                    Program.Client.SendText("/money " + nick.Groups[1].Value);
+                    Program.Client.SendText("/money @" + nick.Groups[1].Value);
 
                 }
 
@@ -250,7 +250,7 @@ namespace MinecraftClient.HtBot
                         foreach (string account in accounts)
                         {
                             wait(500);
-                            Program.Client.SendText("/money " + account);
+                            Program.Client.SendText("/money @" + account);
                             wait(500);
                         }
                     }
