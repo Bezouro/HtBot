@@ -2,6 +2,7 @@
 using System.IO;
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace MinecraftClient.HtBot
 {
@@ -367,6 +368,11 @@ namespace MinecraftClient.HtBot
 
         public void addTreasure(int lvl, string nick)
         {
+
+            DateTime dt = DateTime.Now;
+            string date = DateTime.Today.ToString("dd/MM");
+            string Time = dt.ToLongTimeString();
+
             try
             {
                 int count = 0;
@@ -385,7 +391,7 @@ namespace MinecraftClient.HtBot
                         if (Nick.ToLower().Equals(nick.ToLower()))
                         {
                             JArray treasures = (JArray) parsingAccount["treasures"];
-                            treasures.Add(lvl);
+                            treasures.Add("[" + date + " " + Time + "] " + lvl);
                             Telegram.SendHtmlMessage("🎉A conta <code>" + nick + "</code> Acaba de pegar um <b>Tesouro Nível " + lvl + "</b>🎉");
                             Program.Client.SendText("/g [BezouroBot] " + nick + " usa o BezouroBot e ja sabe que achou um tesouro " + lvl);
                             WriteData();
@@ -458,49 +464,70 @@ namespace MinecraftClient.HtBot
                     if ((int)User.GetValue("user_id") == user)
                     {
                         JArray accounts = (JArray)User.GetValue("user_accounts");
+                        bool foundtreasure;
+
                         foreach (JToken acc in accounts)
                         {
                             string conta = (string)acc["nick"];
                             JArray treasures = (JArray)acc["treasures"];
+                            foundtreasure = false;
+                            string accTsrs = "<code>" + conta + "</code>: %0A";
 
                             foreach (JValue lvl in treasures)
                             {
-                                int level = int.Parse(lvl.ToString());
-                                if (!found)
+                                if (Regex.IsMatch(lvl.ToString(), "^(\\[\\d\\d/\\d\\d \\d\\d:\\d\\d:\\d\\d\\]) (\\d{1,2})$"))
                                 {
-                                    if (lvl != null)
+                                    Match match = Regex.Match(lvl.ToString(), "^(\\[\\d\\d/\\d\\d \\d\\d:\\d\\d:\\d\\d\\]) (\\d{1,2})$");
+                                    string time = match.Groups[1].Value;
+                                    int level = int.Parse(match.Groups[2].Value);
+
+                                    if (!found)
                                     {
-                                        found = true;
+                                        if (lvl != null)
+                                        {
+                                            found = true;
+                                            foundtreasure = true;
+                                        }
                                     }
-                                }
-                                string book = null;
+                                    else
+                                    {
+                                        if (lvl != null)
+                                        {
+                                            foundtreasure = true;
+                                        }
+                                    }
+                                    string book = null;
 
-                                if (level > 0 && level < 7)
-                                {
-                                    book = "📗";
-                                }
+                                    if (level > 0 && level < 7)
+                                    {
+                                        book = "📗";
+                                    }
 
-                                if (level > 6 && level < 10)
-                                {
-                                    book = "📘";
-                                }
+                                    if (level > 6 && level < 10)
+                                    {
+                                        book = "📘";
+                                    }
 
-                                if (level == 10)
-                                {
-                                    book = "📙";
-                                }
-                                if (level == 11)
-                                {
-                                    book = "📕";
-                                }
-                                if (level > 11)
-                                {
-                                    book = "📓";
-                                }
+                                    if (level == 10)
+                                    {
+                                        book = "📙";
+                                    }
+                                    if (level == 11)
+                                    {
+                                        book = "📕";
+                                    }
+                                    if (level > 11)
+                                    {
+                                        book = "📓";
+                                    }
 
-                                string treasure = book + "Tesouro Nivel (" + level + ") - <code>" + conta + "</code>";
-                                reply = reply + treasure + "%0A";
+                                    accTsrs = accTsrs + "   <b>" + time + "</b> " + book + "Tesouro Nivel (" + level + ")%0A";
+                                }
+                            }
 
+                            if (foundtreasure)
+                            {
+                                reply = reply + accTsrs;
                             }
 
                         }
