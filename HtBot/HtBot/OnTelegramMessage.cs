@@ -153,12 +153,20 @@ namespace MinecraftClient.HtBot
                         {
                             vars.tmoney = true;
                             Program.Client.SendText("/money " + nick.Groups[1].Value);
+                            return;
                         }
                         else
                         {
                             response.sendNickSpace();
                             return;
                         }
+                    }
+
+                    if (nick.Groups[1].Value.ToLower().Equals("top"))
+                    {
+                        vars.tmoney = true;
+                        Program.Client.SendText("/money " + nick.Groups[1].Value);
+                        return;
                     }
 
                     vars.tmoney = true;
