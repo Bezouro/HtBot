@@ -1,0 +1,302 @@
+﻿using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using System.Windows.Forms;
+
+namespace MinecraftClient.HtBot
+{
+    class OnTelegramMessage
+    {
+        Response response = new Response();
+        DataManager data = new DataManager();
+
+        public DataManager GetDataManager() {
+            return data;
+        }
+
+        public void onTelegramMessage(int user, string text)
+        {
+
+            if (text.Equals("ajuda"))
+            {
+                response.sendHelp();
+            }
+
+            if (Regex.IsMatch(text, "^ajuda ([1-9])$"))
+            {
+                response.sendHelp(Regex.Match(text, "^ajuda ([1-9])$").Groups[1].Value);
+            }
+
+            if (text.Equals("changelog"))
+            {
+                response.sendChangelog();
+            }
+
+            if (text.Equals("status"))
+            {
+                Telegram.SendTypingStatus();
+                response.sendStatus(vars.loggedIn);
+            }
+
+            if (Regex.IsMatch(text, "^add (.+)"))
+            {
+                Match nick = Regex.Match(text, "^add (.+)");
+                Telegram.SendTypingStatus();
+
+                if (nick.Groups[1].Value.Contains(" "))
+                {
+                    response.sendNickSpace();
+                    return;
+                }
+                data.addNewAccount(user, nick.Groups[1].Value);
+                ConsoleIO.WriteLineFormatted("§d[Banco de dados] §2Adicionando o nick " + nick.Groups[1].Value + " id(" + user + ") Ao banco de dados!");
+            }
+
+            /*if (Regex.IsMatch(text, "^tadd ([0-9]+) (.+)"))
+            {
+                Match nick = Regex.Match(text, "^tadd ([0-9]+) (.+)");
+                data.addTreasure(int.Parse(nick.Groups[1].Value), nick.Groups[2].Value);
+            }*/
+
+            if (Regex.IsMatch(text, "^nadd (.+) (.+)"))
+            {
+                Match notify = Regex.Match(text, "^nadd (.+) (.+)");
+
+                data.addNotification(notify.Groups[1].Value, notify.Groups[2].Value);
+            }
+
+            if (text.ToLower().Equals("tesouros"))
+            {
+                response.sendTreasures(user);
+            }
+
+            if (text.ToLower().Equals("mensagens"))
+            {
+                response.sendNotifications(user);
+            }
+
+            if (text.ToLower().Equals("limparmensagens"))
+            {
+                response.sendNotificationsClear(user);
+            }
+
+            if (text.ToLower().Equals("limpartesouros"))
+            {
+                response.sendTreasuresClear(user);
+            }
+
+            if (Regex.IsMatch(text, "^del (.+)"))
+            {
+                Match nick = Regex.Match(text, "^del (.+)");
+                Telegram.SendTypingStatus();
+
+                if (nick.Groups[1].Value.Contains(" "))
+                {
+                    response.sendNickSpace();
+                    return;
+                }
+                data.removeAccount(user, nick.Groups[1].Value);
+                ConsoleIO.WriteLineFormatted("§d[Banco de dados] §2Removendo o nick " + nick.Groups[1].Value + " id(" + user + ") Do banco de dados!");
+            }
+
+            if (text.ToLower().Equals("contas"))
+            {
+                response.sendNicknames(user);
+            }
+
+            if (vars.loggedIn)
+            {
+                if (Regex.IsMatch(text, "^(?:online|o|a) ([a-zA-Z0-9-_]+)(?: (?:ta|tá|esta|está) on.*|$)"))
+                {
+                    Match nick = Regex.Match(text, "^(?:online|o|a) ([a-zA-Z0-9-_]+)(?: (?:ta|tá|esta|está) on.*|$)");
+                    bool isOnline = false;
+                    Telegram.SendTypingStatus();
+
+                    foreach (var player in Program.Client.GetOnlinePlayers())
+                    { 
+
+                        if (player.ToLower().Equals(nick.Groups[1].Value.ToLower()))
+                        {
+                            isOnline = true;
+                            response.sendOnline(isOnline, player);
+                            
+                        }
+                            
+                    }
+
+                    if (!isOnline)
+                    {
+                        foreach (var player in Program.Client.GetOnlinePlayers())
+                        {
+
+                            if (player.ToLower().Contains(nick.Groups[1].Value.ToLower()))
+                            {
+                                isOnline = true;
+                                response.sendOtherOnline(player);
+                                break;
+                            }
+                        }
+
+                        if(!isOnline)
+                            response.sendOnline(isOnline, nick.Groups[1].Value);
+                    }
+
+                }
+
+                if (Regex.IsMatch(text, "^money (.+)"))
+                {
+                    Match nick = Regex.Match(text, "^money (.+)");
+                    Telegram.SendTypingStatus();
+
+                    if (nick.Groups[1].Value.Contains(" "))
+                    {
+                        if (nick.Groups[1].Value.Contains("rank "))
+                        {
+                            vars.tmoney = true;
+                            Program.Client.SendText("/money " + nick.Groups[1].Value);
+                        }
+                        else
+                        {
+                            response.sendNickSpace();
+                            return;
+                        }
+                    }
+
+                    vars.tmoney = true;
+                    Program.Client.SendText("/money " + nick.Groups[1].Value);
+
+                }
+
+                if (Regex.IsMatch(text, "^inspect (.+)"))
+                {
+                    Match nick = Regex.Match(text, "^inspect (.+)");
+                    Telegram.SendTypingStatus();
+
+                    if (nick.Groups[1].Value.Contains(" "))
+                    {
+                        response.sendNickSpace();
+                        return;
+                    }
+
+                    vars.checkSkills = true;
+                    Program.Client.SendText("/inspect " + nick.Groups[1].Value);
+
+                }
+
+                if (Regex.IsMatch(text, "^mctop (.+)"))
+                {
+                    Match skill = Regex.Match(text, "^mctop (.+)");
+                    Telegram.SendTypingStatus();
+
+                    vars.checkmctop = true;
+                    Program.Client.SendText("/mctop " + skill.Groups[1].Value);
+                    vars.mctopskill = skill.Groups[1].Value;
+
+                }
+
+                if (Regex.IsMatch(text, "^mctop$"))
+                {
+                    Match skill = Regex.Match(text, "^mctop$");
+                    Telegram.SendTypingStatus();
+
+                    vars.checkmctop = true;
+                    Program.Client.SendText("/mctop");
+                    vars.mctopskill = "Geral";
+
+                }
+
+                if (Regex.IsMatch(text, "^inspect$"))
+                {
+                    Telegram.SendTypingStatus();
+
+                    vars.checkMultipleSkills = true;
+
+                    List<string> accounts = Telegram.data.GetAccountList(user);
+
+                    vars.multipleskillscheck = accounts.Count;
+                    vars.checkedskillscount = 0;
+
+                    ConsoleIO.WriteLine(accounts.Count + "");
+
+                    if (accounts.Count > 0)
+                    {
+                        foreach (string account in accounts)
+                        {
+                            wait(500);
+                            Program.Client.SendText("/inspect " + account);
+                            wait(500);
+                        }
+                    }
+                    else
+                    {
+                        Telegram.SendHtmlMessage(vars.emjerror + " Antes de usar esse comando %0AUse /add <code>nick</code> para adicionar suas contas!");
+                    }
+
+
+                }
+
+                if (Regex.IsMatch(text, "^money$"))
+                {
+                    Telegram.SendTypingStatus();
+
+                    vars.checkMultipleMoney = true;
+
+                    List<string> accounts = Telegram.data.GetAccountList(user);
+
+                    vars.multiplemoneycheck = accounts.Count;
+                    vars.checkedmoneycount = 0;
+
+                    if (accounts.Count > 0)
+                    {
+                        foreach (string account in accounts)
+                        {
+                            wait(500);
+                            Program.Client.SendText("/money " + account);
+                            wait(500);
+                        }
+                    }
+                    else
+                    {
+                        Telegram.SendHtmlMessage(vars.emjerror + " Antes de usar esse comando %0AUse /add <code>nick</code> para adicionar suas contas!");
+                    }
+
+
+                }
+
+                if (Regex.IsMatch(text, "^online$"))
+                {
+                    Telegram.SendTypingStatus();
+
+                    response.sendOnlineNicknames(user);
+
+                }
+
+            }
+            else
+            {
+
+            }
+            
+        }
+
+        public void wait(int milliseconds)
+        {
+            System.Windows.Forms.Timer timer1 = new System.Windows.Forms.Timer();
+            if (milliseconds == 0 || milliseconds < 0) return;
+            //Console.WriteLine("start wait timer");
+            timer1.Interval = milliseconds;
+            timer1.Enabled = true;
+            timer1.Start();
+            timer1.Tick += (s, e) =>
+            {
+                timer1.Enabled = false;
+                timer1.Stop();
+                //Console.WriteLine("stop wait timer");
+            };
+            while (timer1.Enabled)
+            {
+                Application.DoEvents();
+            }
+        }
+
+    }
+}
