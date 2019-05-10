@@ -263,7 +263,7 @@ namespace MinecraftClient.HtBot
 
                 bool success = Telegram.data.Verify(Nick, Token);
 
-                wait(3000);
+                wait(4000);
 
                 if (success)
                 {
