@@ -110,6 +110,10 @@ namespace MinecraftClient.HtBot
         {
             Telegram.SendHtmlMessage(vars.emjinfo + " Conta adicionada com sucesso!");
         }
+        public void sendAccountAlreadyAdded()
+        {
+            Telegram.SendHtmlMessage(vars.emjerror + " A conta ja estava adicionada!");
+        }
 
         public void sendNicknames(int user)
         {

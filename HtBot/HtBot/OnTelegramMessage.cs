@@ -48,6 +48,14 @@ namespace MinecraftClient.HtBot
                     response.sendNickSpace();
                     return;
                 }
+                List<Account> accs = data.GetAccountList(user);
+                foreach (Account acc in accs)
+                {
+                    if (acc.getNick().ToLower().Equals(nick.Groups[1].Value.ToLower())) {
+                        response.sendAccountAlreadyAdded();
+                        return;
+                    }
+                }
                 data.addNewAccount(user, nick.Groups[1].Value);
                 ConsoleIO.WriteLineFormatted("§d[Banco de dados] §2Adicionando o nick " + nick.Groups[1].Value + " id(" + user + ") Ao banco de dados!");
             }
@@ -323,7 +331,7 @@ namespace MinecraftClient.HtBot
 
                         if ((found) && (!verifyed))
                         {
-                            Telegram.SendHtmlMessage(vars.emjok + " Para verificar sua conta, envie um tell <b>dela</b>%0AAssim: <code>/tell htbot verificar " + Token + "</code>");
+                            Telegram.SendHtmlMessage(vars.emjok + " Para verificar sua conta " + nick + ", envie um tell <b>dela</b>%0AAssim: <code>/tell htbot verificar " + Token + "</code>");
                         }
 
                     }
