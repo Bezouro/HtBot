@@ -409,12 +409,13 @@ namespace MinecraftClient.HtBot
             }
         }
 
-        public void addNotification(string nick, string notify)
+        public bool addNotification(string nick, string notify)
         {
 
             DateTime dt = DateTime.Now;
             string date = DateTime.Today.ToString("dd/MM");
             string Time = dt.ToLongTimeString();
+            bool sucess = false;
 
             try
             {
@@ -436,6 +437,7 @@ namespace MinecraftClient.HtBot
                             JArray notifications = (JArray)parsingAccount["notifications"];
                             notifications.Add("<b>[" + date + " " + Time + "]</b> " + notify);
                             WriteData();
+                            sucess = true;
                             break;
                         }
                         count2++;
@@ -447,7 +449,11 @@ namespace MinecraftClient.HtBot
             catch (Exception e)
             {
                 ConsoleIO.WriteLineFormatted(e.ToString());
+                return false;
             }
+
+            return sucess;
+
         }
 
         public string getTreasures(int user)
