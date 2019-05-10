@@ -393,7 +393,7 @@ namespace MinecraftClient.HtBot
                             JArray treasures = (JArray) parsingAccount["treasures"];
                             treasures.Add("[" + date + " " + Time + "] " + lvl);
                             Telegram.SendHtmlMessage("🎉A conta <code>" + nick + "</code> Acaba de pegar um <b>Tesouro Nível " + lvl + "</b>🎉");
-                            Program.Client.SendText("/g [BezouroBot] " + nick + " usa o BezouroBot e ja sabe que achou um tesouro " + lvl);
+                            Program.Client.SendText("/g [Bezouro Bot] " + nick + " usa o Bot e ja sabe que achou um tesouro " + lvl);
                             WriteData();
                             break;
                         }
