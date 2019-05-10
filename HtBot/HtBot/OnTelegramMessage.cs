@@ -284,7 +284,7 @@ namespace MinecraftClient.HtBot
                 if (Regex.IsMatch(text, "^verificar (.+)$"))
                 {
 
-                    Match match = Regex.Match(text, "^verify (.+)$");
+                    Match match = Regex.Match(text, "^verificar (.+)$");
                     string nick = match.Groups[1].Value;
                     List<Account> accounts = Telegram.data.GetAccountList(user);
                     Telegram.SendTypingStatus();
