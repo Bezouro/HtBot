@@ -107,6 +107,7 @@
     <Compile Include="ChatBots\TestBot.cs" />
     <Compile Include="ChatBot.cs" />
     <Compile Include="HtBot\ChatFilter.cs" />
+    <Compile Include="HtBot\Account.cs" />
     <Compile Include="HtBot\DataManager.cs" />
     <Compile Include="HtBot\Response.cs" />
     <Compile Include="HtBot\vars.cs" />

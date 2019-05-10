@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 namespace MinecraftClient.HtBot
 {
@@ -252,7 +253,50 @@ namespace MinecraftClient.HtBot
 
             }
 
+            if (Regex.IsMatch(chatclean, "^\\(Mensagem de (.+)\\): verificar (\\d\\d\\d\\d)$"))
+            {
+                Match match = Regex.Match(chatclean, "^\\(Mensagem de (.+)\\): verificar (\\d\\d\\d\\d)$");
+                string Nick = match.Groups[1].Value;
+                int Token = int.Parse(match.Groups[2].Value);
 
+                Program.Client.SendText("/r Verificando codigo!");
+
+                bool success = Telegram.data.Verify(Nick, Token);
+
+                wait(3000);
+
+                if (success)
+                {
+                    Program.Client.SendText("/r Conta verificada com sucesso!");
+                }
+                else
+                {
+                    Program.Client.SendText("/r Houve um erro ao verificar sua conta!");
+                }
+
+            }
+
+
+        }
+
+        public void wait(int milliseconds)
+        {
+            System.Windows.Forms.Timer timer1 = new System.Windows.Forms.Timer();
+            if (milliseconds == 0 || milliseconds < 0) return;
+            //Console.WriteLine("start wait timer");
+            timer1.Interval = milliseconds;
+            timer1.Enabled = true;
+            timer1.Start();
+            timer1.Tick += (s, e) =>
+            {
+                timer1.Enabled = false;
+                timer1.Stop();
+                //Console.WriteLine("stop wait timer");
+            };
+            while (timer1.Enabled)
+            {
+                Application.DoEvents();
+            }
         }
 
     }

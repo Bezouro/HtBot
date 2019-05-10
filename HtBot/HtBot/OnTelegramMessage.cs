@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using HtBot.HtBot;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
@@ -218,7 +219,7 @@ namespace MinecraftClient.HtBot
 
                     vars.checkMultipleSkills = true;
 
-                    List<string> accounts = Telegram.data.GetAccountList(user);
+                    List<Account> accounts = Telegram.data.GetAccountList(user);
 
                     vars.multipleskillscheck = accounts.Count;
                     vars.checkedskillscount = 0;
@@ -227,10 +228,11 @@ namespace MinecraftClient.HtBot
 
                     if (accounts.Count > 0)
                     {
-                        foreach (string account in accounts)
+                        foreach (Account account in accounts)
                         {
+                            string acc = account.getNick();
                             wait(500);
-                            Program.Client.SendText("/inspect " + account);
+                            Program.Client.SendText("/inspect " + acc);
                             wait(500);
                         }
                     }
@@ -248,17 +250,18 @@ namespace MinecraftClient.HtBot
 
                     vars.checkMultipleMoney = true;
 
-                    List<string> accounts = Telegram.data.GetAccountList(user);
+                    List<Account> accounts = Telegram.data.GetAccountList(user);
 
                     vars.multiplemoneycheck = accounts.Count;
                     vars.checkedmoneycount = 0;
 
                     if (accounts.Count > 0)
                     {
-                        foreach (string account in accounts)
+                        foreach (Account account in accounts)
                         {
+                            string acc = account.getNick();
                             wait(500);
-                            Program.Client.SendText("/money @" + account);
+                            Program.Client.SendText("/money @" + acc);
                             wait(500);
                         }
                     }
@@ -275,6 +278,59 @@ namespace MinecraftClient.HtBot
                     Telegram.SendTypingStatus();
 
                     response.sendOnlineNicknames(user);
+
+                }
+
+                if (Regex.IsMatch(text, "^verificar (.+)$"))
+                {
+
+                    Match match = Regex.Match(text, "^verify (.+)$");
+                    string nick = match.Groups[1].Value;
+                    List<Account> accounts = Telegram.data.GetAccountList(user);
+                    Telegram.SendTypingStatus();
+
+                    if (accounts.Count > 0)
+                    {
+                        bool found = false;
+                        string acc = "";
+                        bool verifyed = false;
+                        int Token = 0;
+
+                        foreach (Account account in accounts)
+                        {
+                            
+                            if (account.getNick().ToLower().Equals(nick.ToLower()))
+                            {
+                                found = true;
+                                acc = account.getNick();
+                                verifyed = account.getVerify();
+                                Token = account.getToken();
+                                break;
+                            }
+                        }
+
+                        if (!found)
+                        {
+                            Telegram.SendHtmlMessage(vars.emjerror + " Conta nao encontrada!");
+                            return;
+                        }
+
+                        if (verifyed)
+                        {
+                            Telegram.SendHtmlMessage(vars.emjerror + " A conta já estava verificada!");
+                            return;
+                        }
+
+                        if ((found) && (!verifyed))
+                        {
+                            Telegram.SendHtmlMessage(vars.emjok + " Para verificar sua conta, envie um tell <b>dela</b>%0AAssim: <code>/tell htbot verificar " + Token + "</code>");
+                        }
+
+                    }
+                    else
+                    {
+                        Telegram.SendHtmlMessage(vars.emjerror + " Antes de usar esse comando %0AUse /add <code>nick</code> para adicionar suas contas!");
+                    }
 
                 }
 

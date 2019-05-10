@@ -24,6 +24,7 @@ namespace MinecraftClient.HtBot
                     response.Add("\"/contas\" mostra seus nicks");
                     response.Add("\"/add (nick)\" adiciona o nick a sua lista pessoal de nicks");
                     response.Add("\"/del (nick)\" Remove o nick da sua lista pessoal de nicks");
+                    response.Add("\"/verificar (nick)\" Verifica a posse da conta");
                     response.Add("\"/ajuda\" mostra esses comandos :)");
                     response.Add("\"/money (nick)\" mostra o money do jogador");
                     response.Add("\"/money top\" mostra o ranking dos 15 jogadores mais ricos do servidor");

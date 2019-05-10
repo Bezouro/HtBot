@@ -3,6 +3,7 @@ using System.IO;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using HtBot.HtBot;
 
 namespace MinecraftClient.HtBot
 {
@@ -117,6 +118,8 @@ namespace MinecraftClient.HtBot
                     count++;
                 }
 
+                Random random = new Random();
+
                 JObject theUser = (JObject)users[count];
                 JArray accounts = (JArray)theUser["user_accounts"];
 
@@ -128,6 +131,10 @@ namespace MinecraftClient.HtBot
                 jsona.Add("treasures", treasures);
                 JArray notifications = new JArray();
                 jsona.Add("notifications", notifications);
+                JToken verified = false;
+                jsona.Add("verified", verified);
+                JToken token = random.Next(1000, 9999);
+                jsona.Add("token", token);
 
                 accounts.Add(jsona);
                 WriteData();
@@ -207,6 +214,7 @@ namespace MinecraftClient.HtBot
                         foreach (JToken acc in accounts)
                         {
                             string conta = (string)acc["nick"];
+                            bool verified = Convert.ToBoolean(acc["verified"]);
 
                             if (!found)
                             {
@@ -216,7 +224,18 @@ namespace MinecraftClient.HtBot
                                 }
                             }
 
-                            string nick = "<code>" + conta + "</code>";
+                            string verify = "";
+
+                            if (verified)
+                            {
+                                verify = "✅";
+                            }
+                            else
+                            {
+                                verify = "❌";
+                            }
+
+                            string nick = verify + " <code>" + conta + "</code>";
                             reply = reply + nick + "%0A";
                         }
 
@@ -240,6 +259,57 @@ namespace MinecraftClient.HtBot
             }
 
         }
+
+
+        public bool Verify(string Account, int Token)
+        {
+            DateTime dt = DateTime.Now;
+            string date = DateTime.Today.ToString("dd/MM");
+            string Time = dt.ToLongTimeString();
+            bool sucess = false;
+
+            try
+            {
+                int count = 0;
+                foreach (var zzz in users)
+                {
+                    JObject theUser = (JObject)users[count];
+                    JArray accounts = (JArray)theUser["user_accounts"];
+                    int count2 = 0;
+
+                    foreach (var aaa in accounts)
+                    {
+                        JObject parsingAccount = (JObject)accounts[count2];
+                        string account = parsingAccount["nick"].ToString();
+                        int token = (int)parsingAccount["token"];
+
+
+                        if ((token == Token) && (account.ToLower() == Account.ToLower()))
+                        {
+                            sucess = true;
+                            parsingAccount["verified"] = true;
+                            JArray notifications = (JArray)parsingAccount["notifications"];
+                            notifications.Add("<b>[" + date + " " + Time + "]</b> <i>Conta Verificada!</i>");
+                            WriteData();
+                            break;
+                        }
+
+                        count2++;
+                    }
+                    count++;
+                }
+
+            }
+            catch (Exception e)
+            {
+                ConsoleIO.WriteLineFormatted(e.ToString());
+                return false;
+            }
+
+            return sucess;
+
+        }
+
 
         public string GetOnlineAccounts(int user)
         {
@@ -315,12 +385,12 @@ namespace MinecraftClient.HtBot
 
         }
 
-        public List<string> GetAccountList(int user)
+        public List<Account> GetAccountList(int user)
         {
             try
             {
                 bool found = false;
-                List<string> contas = new List<string>();
+                List<Account> contas = new List<Account>();
 
                 foreach (var theUser in users)
                 {
@@ -331,11 +401,15 @@ namespace MinecraftClient.HtBot
                         JArray accounts = (JArray)User.GetValue("user_accounts");
                         foreach (JToken acc in accounts)
                         {
-                            string conta = (string)acc["nick"];
+                            string nick = (string)acc["nick"];
+                            bool verified = Convert.ToBoolean(acc["verified"]);
+                            int token = (int)acc["token"];
+
+                            Account conta = new Account(nick, verified, token);
 
                             if (!found)
                             {
-                                if (conta != null)
+                                if (nick != null)
                                 {
                                     found = true;
                                 }
@@ -355,7 +429,7 @@ namespace MinecraftClient.HtBot
                 }
                 else
                 {
-                    return new List<string>();
+                    return new List<Account>();
                 }
             }
             catch (Exception e)

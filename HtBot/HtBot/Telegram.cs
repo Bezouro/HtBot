@@ -220,8 +220,8 @@ namespace MinecraftClient.HtBot
                         if (type == 0)
                         {
                             ConsoleIO.WriteLineFormatted("§6[Telegram] Nova Mensagem: " + MessageText);
-                            telegramEvent.onTelegramMessage((int)FromID, MessageText.ToString().Replace(BotUserName, "").Replace("/", ""));
                             data.verifyBotUser((int)FromID, (string)FirstName);
+                            telegramEvent.onTelegramMessage((int)FromID, MessageText.ToString().Replace(BotUserName, "").Replace("/", ""));
                         }
 
                         if (type == 1)
