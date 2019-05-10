@@ -151,7 +151,7 @@ namespace MinecraftClient.HtBot
                     {
                         if (nick.Groups[1].Value.Contains("rank "))
                         {
-                            vars.tmoney = true;
+                            vars.checkMoneyRank = true;
                             Program.Client.SendText("/money " + nick.Groups[1].Value);
                             return;
                         }

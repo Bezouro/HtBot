@@ -233,12 +233,15 @@ namespace MinecraftClient.HtBot
 
             if (Regex.IsMatch(chatclean, "^(.+) é o (\\d{1,5}). mais rico do servidor.$"))
             {
-                Match notificação = Regex.Match(chatclean, "^(.+) é o (\\d{1,5}). mais rico do servidor.$");
-                string nick = notificação.Groups[1].Value;
-                int pos = int.Parse(notificação.Groups[2].Value);
+                if (vars.checkMoneyRank)
+                {
+                    vars.checkMoneyRank = false;
+                    Match notificação = Regex.Match(chatclean, "^(.+) é o (\\d{1,5}). mais rico do servidor.$");
+                    string nick = notificação.Groups[1].Value;
+                    int pos = int.Parse(notificação.Groups[2].Value);
 
-                Telegram.SendHtmlMessage("<code>"+ pos + "º</code>) <b>" + nick + "</b>");
-
+                    Telegram.SendHtmlMessage("<code>" + pos + "º</code>) <b>" + nick + "</b>");
+                }
 
             }
 
