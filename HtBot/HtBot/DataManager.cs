@@ -282,9 +282,10 @@ namespace MinecraftClient.HtBot
                         JObject parsingAccount = (JObject)accounts[count2];
                         string account = parsingAccount["nick"].ToString();
                         int token = (int)parsingAccount["token"];
+                        bool verified = Convert.ToBoolean(parsingAccount["verified"]);
 
 
-                        if ((token == Token) && (account.ToLower() == Account.ToLower()))
+                        if ((token == Token) && (account.ToLower() == Account.ToLower())&&(!verified))
                         {
                             sucess = true;
                             parsingAccount["verified"] = true;
