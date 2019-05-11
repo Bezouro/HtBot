@@ -54,6 +54,7 @@ namespace MinecraftClient.HtBot
                     response.Add("\"/tesouros\" Exibe seus tesouros");
                     response.Add("\"/limparmensagens\" Limpa suas notificações");
                     response.Add("\"/limpartesouros\" Limpa seus tesouros");
+                    response.Add("\"/wm\" Exibe a quantidade de players no server");
                     response.Add("\"/ajuda 4\" Futuramente exibira a proxima pagina!");
                     break;
                 default:
