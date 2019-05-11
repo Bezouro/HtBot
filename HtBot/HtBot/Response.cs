@@ -209,7 +209,7 @@ namespace MinecraftClient.HtBot
             {
                 if (Regex.IsMatch(line, "^(.+) (.+)$"))
                 {
-                    Match match = Regex.Match(line, "^(.+) (.+)$");
+                    Match match = Regex.Match(line, "^(.+) <b>(.+)</b>$");
                     string moneynick = match.Groups[1].Value;
                     string money = match.Groups[2].Value;
 
@@ -225,7 +225,7 @@ namespace MinecraftClient.HtBot
 
             if (moneyList.Count > 1)
             {
-                Money = Money + "════════════════════%0ATotal: " + Total;
+                Money = Money + "════════════════════%0ATotal: <b>" + Total + "</b>";
             }
 
             vars.checkMultipleMoney = false;
