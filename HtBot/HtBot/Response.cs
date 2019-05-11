@@ -77,15 +77,16 @@ namespace MinecraftClient.HtBot
 
             response.Add("Changelog");
             response.Add("════════════════════");
-            response.Add("----(07/05/2019)----");
-            response.Add("  Bot reativado");
-            response.Add("  alguns comandos corrigidos");
-            response.Add("----(08/05/2019)----");
-            response.Add("  comandos atualizados");
-            response.Add("  adicionado a possibilidade de%0AVerificar o /money rank");
-            response.Add("  adicionado aviso ao encontrar um novo tesouro");
             response.Add("----(09/05/2019)----");
-            response.Add("  adicionado sistema de verificação%0ADe varias contas de 1x");
+            response.Add("-  adicionado sistema de verificação%0ADe varias contas de 1x");
+            response.Add("----(10/05/2019)----");
+            response.Add("-  Adicionada verificação de posse das contas!");
+            response.Add("-  Adicionada verificação se uma conta ja estava adicionada!");
+            response.Add("-  Adicionada verificação de posse das contas!");
+            response.Add("----(11/05/2019)----");
+            response.Add("-  adicionado /wm");
+            response.Add("-  mensagem de money atualizada");
+            response.Add("-  <b>Novidades Em Breve!</b>");
 
 
             foreach (string content in response)
@@ -187,10 +188,15 @@ namespace MinecraftClient.HtBot
             else { Telegram.SendHtmlMessage(vars.emjinfo + "<b>Sua lista de mensagens foi limpa!</b>"); }
         }
 
+        public void sendWM(int online)
+        {
+            vars.sendWM = false;
+            Telegram.SendHtmlMessage(vars.emjinfo + " Atualmente o servidor tem <b>" + online + "</b> Players online!");
+        }
 
         public void sendMoney(string nick, string money)
         {
-            Telegram.SendHtmlMessage(vars.emjmoney + " O money de " + nick + " é <code>" + money + "</code> Coins!");
+            Telegram.SendHtmlMessage(vars.emjmoney + " O money de " + nick + " é <b>" + money + "</b> Coins!");
         }
         public void sendMultipleMoney(List<string> moneyList)
         {

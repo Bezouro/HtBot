@@ -14,6 +14,7 @@ namespace MinecraftClient.HtBot
         public static bool checkMultipleMoney;
         public static bool checkmctop;
         public static bool checkMoneyRank;
+        public static bool sendWM;
 
         public const bool debug = false;
 

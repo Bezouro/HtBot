@@ -48,7 +48,7 @@ namespace MinecraftClient.HtBot
                 }
                 else
                 {
-                    vars.multiplemoney.Add(moneynick + " " + money);
+                    vars.multiplemoney.Add(moneynick + " <b>" + money + "</b>");
 
                     if (vars.multiplemoney.Count == vars.multiplemoneycheck)
                     {
@@ -103,9 +103,9 @@ namespace MinecraftClient.HtBot
                 }
             }
 
-            if (Regex.IsMatch(chatclean, "^(\\d\\d)\\. (.+) - (\\d{1,5})$"))
+            if (Regex.IsMatch(chatclean, "^(\\d{2,5})\\. (.+) - (\\d{1,5})$"))
             {
-                Match match = Regex.Match(chatclean, "^(\\d\\d)\\. (.+) - (\\d{1,5})$");
+                Match match = Regex.Match(chatclean, "^(\\d{2,5})\\. (.+) - (\\d{1,5})$");
                 int pos = int.Parse(match.Groups[1].Value);
                 string nick = match.Groups[2].Value;
                 int level = int.Parse(match.Groups[3].Value);
@@ -272,6 +272,16 @@ namespace MinecraftClient.HtBot
                 else
                 {
                     Program.Client.SendText("/r Houve um erro ao verificar sua conta!");
+                }
+
+            }
+
+            if (Regex.IsMatch(chatclean, "^» Players online: (\\d{1,4})$"))
+            {
+                Match match = Regex.Match(chatclean, "^» Players online: (\\d{1,4})$");
+                if (vars.sendWM)
+                {
+                    response.sendWM(int.Parse(match.Groups[1].Value));
                 }
 
             }

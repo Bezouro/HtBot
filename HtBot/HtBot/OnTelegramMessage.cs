@@ -342,6 +342,12 @@ namespace MinecraftClient.HtBot
 
                 }
 
+                if (text.ToLower().Equals("wm"))
+                {
+                    vars.sendWM = true;
+                    Program.Client.SendText("/wm");
+                }
+
             }
             else
             {
