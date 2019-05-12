@@ -51,6 +51,21 @@ namespace MinecraftClient.HtBot
         public static List<string> mctop = new List<string>();
         public static int mcTopList = 0;
 
+        public static string replaceEmoji(string text)
+        {
+            text = text.Replace("emjthinking",emjthinking);
+            text = text.Replace("emjneutralface",emjneutralface);
+            text = text.Replace("emjthumbsup",emjthumbsup);
+            text = text.Replace("emjmoney",emjmoney);
+            text = text.Replace("emjinfo",emjinfo);
+            text = text.Replace("emjsmile",emjsmile);
+            text = text.Replace("emjok",emjok);
+            text = text.Replace("emjcl",emjcl);
+            text = text.Replace("emjerror",emjerror);
+
+            return text;
+        }
+
     }
 
     

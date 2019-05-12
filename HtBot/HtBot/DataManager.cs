@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using HtBot.HtBot;
+using System.Diagnostics;
 
 namespace MinecraftClient.HtBot
 {
@@ -232,7 +233,7 @@ namespace MinecraftClient.HtBot
                             }
                             else
                             {
-                                verify = "❌";
+                                verify = "☑️";
                             }
 
                             string nick = verify + " <code>" + conta + "</code>";
@@ -308,6 +309,130 @@ namespace MinecraftClient.HtBot
             }
 
             return sucess;
+
+        }
+
+        public bool mathToken(string Account, int Token)
+        {
+            bool sucess = false;
+
+            try
+            {
+                int count = 0;
+                foreach (var zzz in users)
+                {
+                    JObject theUser = (JObject)users[count];
+                    JArray accounts = (JArray)theUser["user_accounts"];
+                    int count2 = 0;
+
+                    foreach (var aaa in accounts)
+                    {
+                        JObject parsingAccount = (JObject)accounts[count2];
+                        string account = parsingAccount["nick"].ToString();
+                        int token = (int)parsingAccount["token"];
+
+                        if ((token == Token) && (account.ToLower() == Account.ToLower()))
+                        {
+                            sucess = true;
+                            break;
+                        }
+
+                        count2++;
+                    }
+                    count++;
+                }
+
+            }
+            catch (Exception e)
+            {
+                ConsoleIO.WriteLineFormatted(e.ToString());
+                return sucess;
+            }
+
+            return sucess;
+
+        }
+
+        public int getIdFromToken(int Token)
+        {
+            try
+            {
+                int count = 0;
+                foreach (var zzz in users)
+                {
+                    JObject theUser = (JObject)users[count];
+                    JArray accounts = (JArray)theUser["user_accounts"];
+                    int count2 = 0;
+
+                    foreach (var aaa in accounts)
+                    {
+                        JObject parsingAccount = (JObject)accounts[count2];
+                        string account = parsingAccount["nick"].ToString();
+                        int token = (int)parsingAccount["token"];
+
+                        if (token == Token)
+                        {
+                            return (int)theUser["user_id"];
+                        }
+
+                        count2++;
+                    }
+                    count++;
+                }
+
+            }
+            catch (Exception e)
+            {
+                ConsoleIO.WriteLineFormatted(e.ToString());
+                return 0;
+            }
+
+            return 0;
+
+        }
+
+        public bool ResponseLimit(int Token, bool change = false)
+        {
+            bool ok = false;
+            try
+            {
+                int count = 0;
+                foreach (var zzz in users)
+                {
+                    JObject theUser = (JObject)users[count];
+                    JArray accounts = (JArray)theUser["user_accounts"];
+                    int count2 = 0;
+
+                    foreach (var aaa in accounts)
+                    {
+                        JObject parsingAccount = (JObject)accounts[count2];
+                        long limit = (long)parsingAccount["limitresponse"];
+                        int token = (int)parsingAccount["token"];
+
+                        if (token == Token)
+                        {
+                            ok = getNano() < limit;
+                            if (change)
+                            { 
+                                parsingAccount["limitresponse"] = getNano() + 3;
+                                WriteData();
+                            }
+                            return ok;
+                        }
+
+                        count2++;
+                    }
+                    count++;
+                }
+
+            }
+            catch (Exception e)
+            {
+                ConsoleIO.WriteLineFormatted(e.ToString());
+                return ok;
+            }
+
+            return ok;
 
         }
 
@@ -484,7 +609,7 @@ namespace MinecraftClient.HtBot
             }
         }
 
-        public bool addNotification(string nick, string notify)
+        public bool addNotification(string nick, string notify, bool verifyToken = false, int token = 0000)
         {
 
             DateTime dt = DateTime.Now;
@@ -505,9 +630,15 @@ namespace MinecraftClient.HtBot
                     {
                         JObject parsingAccount = (JObject)accounts[count2];
                         string Nick = parsingAccount["nick"].ToString();
-                        //ConsoleIO.WriteLineFormatted(nick + "->" + Nick);
+                        int Token = (int)parsingAccount["token"];
+                        bool add = false;
 
-                        if (Nick.ToLower().Equals(nick.ToLower()))
+                        if (((verifyToken)&&(token == Token))||(!verifyToken))
+                        {
+                            add = true;
+                        }
+
+                        if ((Nick.ToLower().Equals(nick.ToLower()))&&(add))
                         {
                             JArray notifications = (JArray)parsingAccount["notifications"];
                             notifications.Add("<b>[" + date + " " + Time + "]</b> " + notify);
@@ -871,6 +1002,12 @@ namespace MinecraftClient.HtBot
                 return false;
             }
 
+        }
+
+        public static long getNano()
+        {
+            long nano = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+            return nano;
         }
 
     }

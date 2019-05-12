@@ -62,6 +62,7 @@ namespace MinecraftClient.HtBot
                 using (Stream stream = response.GetResponseStream())
                 using (StreamReader reader = new StreamReader(stream))
 
+
                 ConsoleIO.WriteLineFormatted("§6[Telegram] §aMensagem enviada ao telegram: §f" + type);
                 return true;
             }
@@ -86,24 +87,77 @@ namespace MinecraftClient.HtBot
                 using (Stream stream = response.GetResponseStream())
                 using (StreamReader reader = new StreamReader(stream))
 
-                ConsoleIO.WriteLineFormatted("§6[Telegram] §aMensagem enviada ao telegram: §f" + type);
+
+                    ConsoleIO.WriteLineFormatted("§6[Telegram] §aMensagem enviada ao telegram: §f" + type);
                 return true;
             }
             catch (System.Exception e)
             {
                 ConsoleIO.WriteLineFormatted("§6[Telegram] §cNão foi possivel enviar a mensagem: §f" + type);
-                ConsoleIO.WriteLineFormatted( e.GetBaseException() + ": " + e.Message);
+                ConsoleIO.WriteLineFormatted(e.GetBaseException() + ": " + e.Message);
                 return false;
+            }
+
+        }
+        public static bool SendPrivateMessage(int id, string text, string type = "Resposta de comando", bool fromgroup = false)
+        {
+            string message = text.Replace(",", "%2C").Replace(".", "%2E");
+
+            try
+            {
+
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(telegram + token + "/sendMessage?chat_id=" + id + "&text=" + message + "&parse_mode=html");
+                request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                Stream stream = response.GetResponseStream();
+                StreamReader reader = new StreamReader(stream);
+                string json = reader.ReadLine();
+                JObject jsonObject = JObject.Parse(json);
+                ConsoleIO.WriteLineFormatted("§6[Telegram] §aMensagem enviada ao telegram: §f" + type);
+
+                return true;
+            }
+            catch (WebException e)
+            {
+                HttpWebResponse response = (HttpWebResponse)e.Response;
+
+                if ((int)response.StatusCode == 400)
+                {
+                    if (fromgroup)
+                    {
+                        SendHtmlMessage(vars.emjerror + " Por favor antes disso me envie uma mensagem privada!%0A<a href=\"tg://user?id=683734351\">Toque aqui</a>");
+                    }
+                    return false;
+                }
+                else if ((int)response.StatusCode == 403)
+                {
+                    if (fromgroup)
+                    {
+                        SendHtmlMessage(vars.emjerror + " Por favor antes disso me envie uma mensagem privada!%0A<a href=\"tg://user?id=683734351\">Toque aqui</a>");
+                    }
+                    return false;
+                }
+                else
+                { 
+                    ConsoleIO.WriteLineFormatted("§6[Telegram] §cNão foi possivel enviar a mensagem: §f" + type);
+                    ConsoleIO.WriteLineFormatted(e.GetBaseException() + ": " + e.Message);
+                    return false;
+                }
             }
 
         }
 
 
-        public static bool SendTypingStatus() {
+        public static bool SendTypingStatus(string user = chatid) {
             try
             {
-                Connection.DownloadString(telegram + token + "/sendChatAction?chat_id=" + chatid + "&action=typing");
-                ConsoleIO.WriteLineFormatted("§6[Telegram] §aStatus \"Escrevendo\" enviado ao telegram!");
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(telegram + token + "/sendChatAction?chat_id=" + user + "&action=typing");
+                request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                using (Stream stream = response.GetResponseStream())
+                using (StreamReader reader = new StreamReader(stream))
+
+                    ConsoleIO.WriteLineFormatted("§6[Telegram] §aStatus \"Escrevendo\" enviado ao telegram!");
                 return true;
             }
             catch
@@ -221,7 +275,7 @@ namespace MinecraftClient.HtBot
                         {
                             ConsoleIO.WriteLineFormatted("§6[Telegram] Nova Mensagem: " + MessageText);
                             data.verifyBotUser((int)FromID, (string)FirstName);
-                            telegramEvent.onTelegramMessage((int)FromID, MessageText.ToString().Replace(BotUserName, "").Replace("/", ""));
+                            telegramEvent.onTelegramMessage((string)ChatID, (string)FromID, MessageText.ToString().Replace(BotUserName, "").Replace("/", ""));
                         }
 
                         if (type == 1)

@@ -279,9 +279,78 @@ namespace MinecraftClient.HtBot
             if (Regex.IsMatch(chatclean, "^» Players online: (\\d{1,4})$"))
             {
                 Match match = Regex.Match(chatclean, "^» Players online: (\\d{1,4})$");
-                if (vars.sendWM)
+                if (!vars.sendWM)
+                {
+                    return;
+                }
+                else
                 {
                     response.sendWM(int.Parse(match.Groups[1].Value));
+                }
+
+            }
+
+            if (Regex.IsMatch(chatclean, "^\\(Mensagem de (.+)\\): ([0-1]) (\\d{4}) (.+)$"))
+            {
+                Match resposta = Regex.Match(chatclean, "^\\(Mensagem de (.+)\\): ([0-1]) (\\d{4}) (.+)$");
+                string Sender = resposta.Groups[1].Value;
+                bool privado = Convert.ToBoolean(int.Parse(resposta.Groups[2].Value));
+                int Token = int.Parse(resposta.Groups[3].Value);
+                string Message = resposta.Groups[4].Value;
+                
+
+                bool mathToken = Telegram.data.mathToken(Sender, Token);
+                bool waiting = Telegram.data.ResponseLimit(Token);
+
+
+                if (mathToken)
+                {
+                    if (privado)
+                    {
+                        Telegram.SendPrivateMessage(Telegram.data.getIdFromToken(Token), vars.replaceEmoji(Message));
+                    }
+                    else
+                    {
+                        if (waiting)
+                        {
+                            string response = "Mensagem de " + Sender + ":%0A════════════════════%0A" + vars.replaceEmoji(Message);
+                            Telegram.SendHtmlMessage(response);
+                        }
+                    }
+                }
+                else
+                {
+                    if (mathToken)
+                    {
+                        Program.Client.SendText("/tell " + Sender + " Desculpe, Tempo de resposta (3s) excedido");
+                    }
+                    else
+                    {
+                        Program.Client.SendText("/tell " + Sender + " Token invalido");
+                    }
+                }
+
+            }
+
+            if (Regex.IsMatch(chatclean, "^\\(Mensagem de (.+)\\): 2 (\\d{4}) (.+)$"))
+            {
+                Match resposta = Regex.Match(chatclean, "^\\(Mensagem de (.+)\\): 2 (\\d{4}) (.+)$");
+                string Sender = resposta.Groups[1].Value;
+                int Token = int.Parse(resposta.Groups[2].Value);
+                string Message = resposta.Groups[3].Value;
+
+
+                bool mathToken = Telegram.data.mathToken(Sender, Token);
+
+
+                if (mathToken)
+                {
+                    Telegram.data.addNotification(Sender, Message, true, Token);
+                    Program.Client.SendText("/tell " + Sender + " Mensagem salva!");
+                }
+                else
+                {
+                    Program.Client.SendText("/tell " + Sender + " Token invalido");
                 }
 
             }
