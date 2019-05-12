@@ -51,6 +51,10 @@ namespace MinecraftClient.HtBot
         public static List<string> mctop = new List<string>();
         public static int mcTopList = 0;
 
+        public static bool IsRunningOnMono()
+        {
+            return Type.GetType("Mono.Runtime") != null;
+        }
         public static string replaceEmoji(string text)
         {
             text = text.Replace("emjthinking",emjthinking);

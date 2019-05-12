@@ -220,8 +220,12 @@ namespace MinecraftClient.HtBot
                 }
             }
 
-            total = total / 100;
-            string Total = total.ToString("C");
+            if (!vars.IsRunningOnMono())
+            {
+                total = total / 100;
+            }
+
+            string Total = total.ToString("C").Replace("¤", vars.emjmoney + " ");
 
             if (moneyList.Count > 1)
             {
