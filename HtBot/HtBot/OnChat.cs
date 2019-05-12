@@ -290,6 +290,11 @@ namespace MinecraftClient.HtBot
 
             }
 
+            if (Regex.IsMatch(chatclean, "^\\[Server\\] REINICIANDO O SERVIDOR\\.$"))
+            {
+                Telegram.SendHtmlMessage(vars.emjinfo + "O servidor está reiniciando!");
+            }
+
             if (Regex.IsMatch(chatclean, "^\\(Mensagem de (.+)\\): ([0-1]) (\\d{4}) (.+)$"))
             {
                 Match resposta = Regex.Match(chatclean, "^\\(Mensagem de (.+)\\): ([0-1]) (\\d{4}) (.+)$");
