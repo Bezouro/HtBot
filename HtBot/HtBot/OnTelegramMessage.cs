@@ -350,10 +350,10 @@ namespace MinecraftClient.HtBot
 
                     }
 
-                    if (Regex.IsMatch(text, "^tell (.{1,16}) (.+)$"))
+                    if (Regex.IsMatch(text, "^tell ([A-z0-9_-]{1,16}) (.+)$"))
                     {
 
-                        Match tell = Regex.Match(text, "^tell (.{1,16}) (.+)$");
+                        Match tell = Regex.Match(text, "^tell ([A-z0-9_-]{1,16}) (.+)$");
                         string nick = tell.Groups[1].Value;
                         string msg = tell.Groups[2].Value;
                         List<Account> accounts = Telegram.data.GetAccountList(user);
@@ -434,10 +434,10 @@ namespace MinecraftClient.HtBot
             }
             else
             {
-                if (Regex.IsMatch(text, "^tell (.{1,16}) (.+)$"))
+                if (Regex.IsMatch(text, "^tell ([A-z0-9_-]{1,16}) (.+)$"))
                 {
 
-                    Match tell = Regex.Match(text, "^tell (.{1,16}) (.+)$");
+                    Match tell = Regex.Match(text, "^tell ([A-z0-9_-]{1,16}) (.+)$");
                     string nick = tell.Groups[1].Value;
                     string msg = tell.Groups[2].Value;
                     List<Account> accounts = Telegram.data.GetAccountList(user);
