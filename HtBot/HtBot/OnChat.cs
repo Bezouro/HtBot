@@ -1,4 +1,5 @@
-﻿using MinecraftClient.Protocol;
+﻿using HtBot.HtBot;
+using MinecraftClient.Protocol;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -10,6 +11,7 @@ namespace MinecraftClient.HtBot
     public class OnChat : ChatBot
     {
         Response response = new Response();
+        //WebConsole wConsole = new WebConsole();
         public void onchat(string text, bool isJson)
         {
 
@@ -23,6 +25,7 @@ namespace MinecraftClient.HtBot
 
             String chat = text;
             String chatclean = GetVerbatim(text);
+            //wConsole.process(chat);
 
             if (chatclean.Equals("»Bem vindo de volta. Por favor digite /login sua-senha."))
             {
@@ -321,18 +324,15 @@ namespace MinecraftClient.HtBot
                             string response = "Mensagem de " + Sender + ":%0A════════════════════%0A" + vars.replaceEmoji(Message);
                             Telegram.SendHtmlMessage(response);
                         }
+                        else
+                        {
+                            Program.Client.SendText("/tell " + Sender + " Desculpe, Tempo de resposta (3s) excedido");
+                        }
                     }
                 }
                 else
                 {
-                    if (mathToken)
-                    {
-                        Program.Client.SendText("/tell " + Sender + " Desculpe, Tempo de resposta (3s) excedido");
-                    }
-                    else
-                    {
-                        Program.Client.SendText("/tell " + Sender + " Token invalido");
-                    }
+                    Program.Client.SendText("/tell " + Sender + " Token invalido");
                 }
 
             }

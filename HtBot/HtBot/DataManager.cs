@@ -129,13 +129,43 @@ namespace MinecraftClient.HtBot
                 jsona.Add("nick", nick);
 
                 JArray treasures = new JArray();
-                jsona.Add("treasures", treasures);
                 JArray notifications = new JArray();
-                jsona.Add("notifications", notifications);
                 JToken verified = false;
-                jsona.Add("verified", verified);
+                JToken limitresponse = getTimestamp();
                 JToken token = random.Next(1000, 9999);
+                JToken last_online = random.Next(1000, 9999);
+                JToken last_offline = random.Next(1000, 9999);
+                JToken Acrobacia = 0;
+                JToken Reparaçao = 0;
+                JToken Machado = 0;
+                JToken Arqueiro = 0;
+                JToken Espadas = 0;
+                JToken Domar = 0;
+                JToken Desarmado = 0;
+                JToken Escavaçao = 0;
+                JToken Pescador = 0;
+                JToken Herbalismo = 0;
+                JToken Mineraçao = 0;
+                JToken Lenhador = 0;
+                jsona.Add("treasures", treasures);
+                jsona.Add("notifications", notifications);
+                jsona.Add("verified", verified);
+                jsona.Add("limitresponse", limitresponse);
                 jsona.Add("token", token);
+                jsona.Add("last_online", last_online);
+                jsona.Add("last_offline", last_offline);
+                jsona.Add("Acrobacia", Acrobacia);
+                jsona.Add("Reparaçao", Reparaçao);
+                jsona.Add("Machado", Machado);
+                jsona.Add("Arqueiro", Arqueiro);
+                jsona.Add("Espadas", Espadas);
+                jsona.Add("Domar", Domar);
+                jsona.Add("Desarmado", Desarmado);
+                jsona.Add("Escavaçao", Escavaçao);
+                jsona.Add("Pescador", Pescador);
+                jsona.Add("Herbalismo", Herbalismo);
+                jsona.Add("Mineraçao", Mineraçao);
+                jsona.Add("Lenhador", Lenhador);
 
                 accounts.Add(jsona);
                 WriteData();
@@ -411,10 +441,10 @@ namespace MinecraftClient.HtBot
 
                         if (token == Token)
                         {
-                            ok = getNano() < limit;
+                            ok = getTimestamp() < limit;
                             if (change)
                             { 
-                                parsingAccount["limitresponse"] = getNano() + 3;
+                                parsingAccount["limitresponse"] = getTimestamp() + 3;
                                 WriteData();
                             }
                             return ok;
@@ -433,6 +463,99 @@ namespace MinecraftClient.HtBot
             }
 
             return ok;
+
+        }
+
+        public int skillLevel(int user, string Acc, string skill, bool change = false, int newLevel = 0)
+        {
+
+            try
+            {
+                int count = 0;
+                foreach (var User in users)
+                {
+                    JObject theUser = (JObject)users[count];
+                    JArray accounts = (JArray)theUser["user_accounts"];
+                    int count2 = 0;
+
+                    if ((int)theUser.GetValue("user_id") == user)
+                    {
+                        foreach (var acc in accounts)
+                        {
+                            JObject parsingAccount = (JObject)accounts[count2];
+                            string account = parsingAccount["nick"].ToString();
+                            int lvl = (int)parsingAccount[skill];
+
+                            if (account.ToLower().Equals(Acc.ToLower()))
+                            {
+                                int retVal = lvl;
+                                if (change)
+                                {
+                                    parsingAccount[skill] = newLevel;
+                                    WriteData();
+                                }
+                                return lvl;
+                            }
+                            
+                            count2++;
+                        }
+                    }
+                    count++;
+                }
+
+            }
+            catch (Exception e)
+            {
+                ConsoleIO.WriteLineFormatted(e.ToString());
+                return 0;
+            }
+
+            return 0;
+
+        }
+
+        public bool loginData(string Acc, string status, long time)
+        {
+
+            try
+            {
+                int count = 0;
+                foreach (var User in users)
+                {
+                    JObject theUser = (JObject)users[count];
+                    JArray accounts = (JArray)theUser["user_accounts"];
+                    int count2 = 0;
+
+
+                    foreach (var acc in accounts)
+                    {
+                        JObject parsingAccount = (JObject)accounts[count2];
+                        string account = parsingAccount["nick"].ToString();
+                        int timestamp = (int)parsingAccount[status];
+
+                        if (account.ToLower().Equals(Acc.ToLower()))
+                        {
+                            
+                            parsingAccount[status] = time;
+                            WriteData();
+                            return true;
+                            
+                        }
+
+                        count2++;
+                    }
+
+                    count++;
+                }
+
+            }
+            catch (Exception e)
+            {
+                ConsoleIO.WriteLineFormatted(e.ToString());
+                return false;
+            }
+
+            return false;
 
         }
 
@@ -477,13 +600,17 @@ namespace MinecraftClient.HtBot
 
                             string nick;
 
+                            string online = "sem dados";
+
                             if (isOnline)
                             {
-                                nick = vars.emjok + " <code>" + conta + "</code>";
+                                online = getDate((long)acc["last_online"]);
+                                nick = vars.emjok + " <code>" + conta + "</code> +" + online;
                             }
                             else
                             {
-                                nick = vars.emjcl + " <code>" + conta + "</code>";
+                                online = getDate((long)acc["last_offline"]);
+                                nick = vars.emjcl + " <code>" + conta + "</code> -" + online;
                             }
 
                             
@@ -1004,10 +1131,20 @@ namespace MinecraftClient.HtBot
 
         }
 
-        public static long getNano()
+        public long getTimestamp()
         {
             long nano = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
             return nano;
+        }
+
+        public string getDate(long timestamp)
+        {
+            DateTime origin = new DateTime(1970, 1, 1);
+            if (timestamp == 0)
+            {
+                return " ---";
+            }
+            return origin.AddSeconds(timestamp).ToLocalTime().ToString("dd/MM HH:mm:ss");
         }
 
     }

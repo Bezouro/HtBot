@@ -3,6 +3,8 @@ using System.Threading;
 using Newtonsoft.Json.Linq;
 using System.IO;
 using System;
+using HtBot.HtBot;
+using System.Collections.Generic;
 
 namespace MinecraftClient.HtBot
 {
@@ -10,7 +12,7 @@ namespace MinecraftClient.HtBot
     {
         
         private const string telegram = "http://api.telegram.org/bot";
-        private const string token = "683734351:AAFxYFMjKbqKEh5GYuzp85pt7_zr3El66bM";
+        private const string token = "656836377:AAFWhZ8NzU7vRowm2uioJuTbQNzb4EHNWOM";
         private const string chatid = "-1001182153789";
         private static string json = null;
         private static OnTelegramMessage telegramEvent = new OnTelegramMessage();
@@ -147,6 +149,39 @@ namespace MinecraftClient.HtBot
 
         }
 
+        public static List<Admin> getGroupAdmins()
+        {
+
+            string getAdmins = telegram + token + "/getChatAdministrators?chat_id=" + chatid;
+            List<Admin> admins = new List<Admin>();
+
+            try
+            {
+                json = Connection.DownloadString(getAdmins);
+
+                JObject jsonObject = JObject.Parse(json);
+
+                JToken ok = jsonObject.GetValue("ok");
+                JToken result = jsonObject.GetValue("result");
+                JArray array = JArray.Parse(result.ToString());
+
+                foreach (JObject jAdmin in array)
+                {
+                    Admin adm = new Admin(jAdmin);
+
+                    admins.Add(adm);
+
+                }
+
+                return admins;
+
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
+
 
         public static bool SendTypingStatus(string user = chatid) {
             try
@@ -163,6 +198,73 @@ namespace MinecraftClient.HtBot
             catch
             {
                 ConsoleIO.WriteLineFormatted("§6[Telegram] §cNão foi possivel enviar o status \"Escrevendo\" ");
+                return false;
+            }
+        }
+
+        public static bool isAdmin(int id)
+        {
+            List<Admin> admins = getGroupAdmins();
+
+            foreach (Admin adm in admins)
+            {
+                if (adm.id() == id)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static Admin getAdmin(int id)
+        {
+            List<Admin> admins = getGroupAdmins();
+
+            foreach (Admin adm in admins)
+            {
+                if (adm.id() == id)
+                {
+                    return adm;
+                }
+            }
+
+            return null;
+        }
+
+        public static bool promoteUser(int user, string cargo)
+        {
+            string crg = "";
+
+            if (cargo.ToLower().Equals("moderador"))
+            {
+                crg = "&can_delete_messages=true&can_restrict_members=true";
+            }
+
+            if (cargo.ToLower().Equals("admin"))
+            {
+                crg = "&can_invite_users=true&can_change_info=true&can_delete_messages=true&can_restrict_members=true&can_pin_messages=true&can_promote_members=true";
+            }
+
+
+            string promote = telegram + token + "/promoteChatMember?chat_id=-1001182153789&user_id=" + user + crg;
+
+            try
+            {
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(telegram + token + "/promoteChatMember?chat_id=-1001182153789&user_id=" + user + crg);
+                request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                using (Stream stream = response.GetResponseStream())
+                using (StreamReader reader = new StreamReader(stream))
+
+                ConsoleIO.WriteLineFormatted("§6[Telegram] §aUsuario Promovido!");
+                return true;
+            }
+            catch(Exception e)
+            {
+                ConsoleIO.WriteLineFormatted("§6[Telegram] §cNão foi possivel promover o usuario ");
+                SendPrivateMessage(566959554, e.Message);
+                SendPrivateMessage(566959554, promote);
                 return false;
             }
         }
@@ -217,9 +319,35 @@ namespace MinecraftClient.HtBot
                         JToken ChatType = chat.GetValue("type");
                         JToken MessageDate = message.GetValue("date");
                         JToken MessageText = message.GetValue("text");
+
+                        bool hasMention = false;
+                        int mentionedId = 0;
+                        JToken Entities = null;
                         JToken newMemberName = null;
                         JToken leftMemberName = null;
                         JToken newMemberID = null;
+
+                        try
+                        {
+                            JArray Aentities = JArray.Parse(message.GetValue("entities").ToString());
+                            foreach (JObject obj in Aentities)
+                            {
+                                JObject jObject = JObject.Parse(obj.ToString());
+                                if (jObject.GetValue("type").ToString().Equals("text_mention"))
+                                {
+                                    hasMention = true;
+                                    JObject mentionedUser = JObject.Parse(jObject.GetValue("user").ToString());
+                                    mentionedId = (int) mentionedUser.GetValue("id");
+
+                                }
+
+                            }
+
+                        }
+                        catch (Exception e)
+                        {
+                            ConsoleIO.WriteLine(e.Message);
+                        }
 
                         if (type == 0)
                         {
@@ -250,7 +378,7 @@ namespace MinecraftClient.HtBot
                             }
                         }
 
-                        if (telegramDebug)
+                        if (true)
                         {
                             ConsoleIO.WriteLineFormatted("");
                             ConsoleIO.WriteLineFormatted("");
@@ -265,6 +393,8 @@ namespace MinecraftClient.HtBot
                             ConsoleIO.WriteLineFormatted("§6[Telegram Chat Type] " + ChatType);
                             ConsoleIO.WriteLineFormatted("§6[Telegram Chat Date] " + MessageDate);
                             ConsoleIO.WriteLineFormatted("§6[Telegram Chat Text] " + MessageText);
+                            ConsoleIO.WriteLineFormatted("§6[Telegram Has Mention] " + hasMention);
+                            ConsoleIO.WriteLineFormatted("§6[Telegram Mentioned User] " + mentionedId);
                         }
 
                         int UpdateId = int.Parse(UpdateID.ToString());
@@ -275,7 +405,7 @@ namespace MinecraftClient.HtBot
                         {
                             ConsoleIO.WriteLineFormatted("§6[Telegram] Nova Mensagem: " + MessageText);
                             data.verifyBotUser((int)FromID, (string)FirstName);
-                            telegramEvent.onTelegramMessage((string)ChatID, (string)FromID, MessageText.ToString().Replace(BotUserName, "").Replace("/", ""));
+                            telegramEvent.onTelegramMessage((string)ChatID, (string)FromID, MessageText.ToString().Replace(BotUserName, "").Replace("/", ""), hasMention, mentionedId);
                         }
 
                         if (type == 1)

@@ -609,6 +609,8 @@ namespace MinecraftClient
             if (!ChatBot.IsValidName(name))
                 return;
 
+            Telegram.data.loginData(name, "last_online", Telegram.data.getTimestamp());
+
             lock (onlinePlayers)
             {
                 onlinePlayers[uuid] = name;
@@ -623,6 +625,7 @@ namespace MinecraftClient
         {
             lock (onlinePlayers)
             {
+                Telegram.data.loginData(onlinePlayers[uuid], "last_offline", Telegram.data.getTimestamp());
                 onlinePlayers.Remove(uuid);
             }
         }

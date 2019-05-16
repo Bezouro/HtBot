@@ -251,7 +251,7 @@ namespace MinecraftClient
         {
             if (!BasicIO)
             {
-                Console.OutputEncoding = Encoding.Unicode;
+                Console.OutputEncoding = Encoding.UTF8;
                 lock (io_lock)
                 {
                     if (reading)

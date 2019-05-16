@@ -14,7 +14,7 @@ namespace MinecraftClient.HtBot
             return data;
         }
 
-        public void onTelegramMessage(string chat, string Suser, string text)
+        public void onTelegramMessage(string chat, string Suser, string text, bool mention, int usermention)
         {
             int user = int.Parse(Suser);
 
@@ -26,9 +26,9 @@ namespace MinecraftClient.HtBot
                     response.sendHelp();
                 }
 
-                if (Regex.IsMatch(text, "^ajuda ([1-9])$"))
+                if (Regex.IsMatch(text, "^ajuda ([1-9])$", RegexOptions.IgnoreCase))
                 {
-                    response.sendHelp(Regex.Match(text, "^ajuda ([1-9])$").Groups[1].Value);
+                    response.sendHelp(Regex.Match(text, "^ajuda ([1-9])$", RegexOptions.IgnoreCase).Groups[1].Value);
                 }
 
                 if (text.Equals("changelog"))
@@ -42,9 +42,9 @@ namespace MinecraftClient.HtBot
                     response.sendStatus(vars.loggedIn);
                 }
 
-                if (Regex.IsMatch(text, "^add (.+)"))
+                if (Regex.IsMatch(text, "^add (.+)", RegexOptions.IgnoreCase))
                 {
-                    Match nick = Regex.Match(text, "^add (.+)");
+                    Match nick = Regex.Match(text, "^add (.+)", RegexOptions.IgnoreCase);
                     Telegram.SendTypingStatus();
 
                     if (nick.Groups[1].Value.Contains(" "))
@@ -71,9 +71,9 @@ namespace MinecraftClient.HtBot
                     data.addTreasure(int.Parse(nick.Groups[1].Value), nick.Groups[2].Value);
                 }*/
 
-                if (Regex.IsMatch(text, "^nadd (.+) (.+)"))
+                if (Regex.IsMatch(text, "^notificar (.+) (.+)", RegexOptions.IgnoreCase))
                 {
-                    Match notify = Regex.Match(text, "^nadd (.+) (.+)");
+                    Match notify = Regex.Match(text, "^notificar (.+) (.+)", RegexOptions.IgnoreCase);
 
                     data.addNotification(notify.Groups[1].Value, notify.Groups[2].Value);
                 }
@@ -98,9 +98,9 @@ namespace MinecraftClient.HtBot
                     response.sendTreasuresClear(user);
                 }
 
-                if (Regex.IsMatch(text, "^del (.+)"))
+                if (Regex.IsMatch(text, "^del (.+)", RegexOptions.IgnoreCase))
                 {
-                    Match nick = Regex.Match(text, "^del (.+)");
+                    Match nick = Regex.Match(text, "^del (.+)", RegexOptions.IgnoreCase);
                     Telegram.SendTypingStatus();
 
                     if (nick.Groups[1].Value.Contains(" "))
@@ -112,6 +112,109 @@ namespace MinecraftClient.HtBot
                     ConsoleIO.WriteLineFormatted("§d[Banco de dados] §2Removendo o nick " + nick.Groups[1].Value + " id(" + user + ") Do banco de dados!");
                 }
 
+                if (Regex.IsMatch(text, "^cargo (.+) (user|moderador|admin)$", RegexOptions.IgnoreCase))
+                {
+                    Match match = Regex.Match(text, "^cargo (.+) (user|moderador|admin)$", RegexOptions.IgnoreCase);
+                    string name = match.Groups[1].Value;
+                    string cargo = match.Groups[2].Value;
+
+                    bool ok = false;
+
+                    Telegram.SendTypingStatus();
+
+                    if (!mention)
+                    {
+                        Telegram.SendHtmlMessage(vars.emjerror + " Mencione alguem para usar este comando!");
+                    }
+
+                    if (Telegram.isAdmin(user))
+                    {
+                        Admin adm = Telegram.getAdmin(user);
+                        if (adm.canPromoteMembers())
+                        {
+                            ok = Telegram.promoteUser(usermention, cargo);
+                        }
+                        else
+                        {
+                            Telegram.SendHtmlMessage(vars.emjerror + " Desculpe, você nao pode alterar cargos!");
+                        }
+                    }
+                    else
+                    {
+                        Telegram.SendHtmlMessage(vars.emjerror + " Apenas Admins podem usar este comando!");
+                    }
+
+
+                    if (ok)
+                    {
+                        Telegram.SendHtmlMessage(vars.emjok + " Cargo de " + name + " Definido para " + cargo);
+                    }
+                    else
+                    {
+                        Telegram.SendHtmlMessage(vars.emjerror + " Erro ao processar a solicitação");
+                    }
+
+                }
+
+                if (Regex.IsMatch(text, "^contas (.+)$", RegexOptions.IgnoreCase))
+                {
+                    Match match = Regex.Match(text, "^contas (.+)$", RegexOptions.IgnoreCase);
+                    string name = match.Groups[1].Value;
+
+                    bool ok = false;
+
+                    Telegram.SendTypingStatus();
+
+                    if (!mention)
+                    {
+                        Telegram.SendHtmlMessage(vars.emjerror + " Mencione alguem para usar este comando!");
+                        return;
+                    }
+
+                    if (Telegram.isAdmin(user))
+                    {
+                        Admin adm = Telegram.getAdmin(user);
+                        if (adm.canPromoteMembers())
+                        {
+                            response.sendNicknames(usermention);
+                        }
+                        else
+                        {
+                            Telegram.SendHtmlMessage(vars.emjerror + " Apenas Admins podem usar este comando!");
+                        }
+                    }
+                    else
+                    {
+                        Telegram.SendHtmlMessage(vars.emjerror + " Apenas Admins podem usar este comando!");
+                    }
+
+                }
+
+                if (Regex.IsMatch(text, "^reconectar$", RegexOptions.IgnoreCase))
+                {
+                    Match match = Regex.Match(text, "^reconectar$", RegexOptions.IgnoreCase);
+
+                    Telegram.SendTypingStatus();
+
+                    if (Telegram.isAdmin(user))
+                    {
+                        Admin adm = Telegram.getAdmin(user);
+                        if (adm.canPromoteMembers())
+                        {
+                            Program.Restart();
+                            Telegram.SendHtmlMessage(vars.emjok + " Reconectando ao servidor!");
+                        }
+                        else
+                        {
+                            Telegram.SendHtmlMessage(vars.emjerror + " Desculpe, você não tem permissão para isso!");
+                        }
+                    }
+                    else
+                    {
+                        Telegram.SendHtmlMessage(vars.emjerror + " Apenas Admins podem usar este comando!");
+                    }
+                }
+
                 if (text.ToLower().Equals("contas"))
                 {
                     response.sendNicknames(user);
@@ -119,13 +222,13 @@ namespace MinecraftClient.HtBot
 
                 if (vars.loggedIn)
                 {
-                    if (Regex.IsMatch(text, "^(?:online|o|a) ([a-zA-Z0-9-_]+)(?: (?:ta|tá|esta|está) on.*|$)"))
+                    if (Regex.IsMatch(text, "^online ([a-zA-Z0-9-_]+)$", RegexOptions.IgnoreCase))
                     {
-                        Match nick = Regex.Match(text, "^(?:online|o|a) ([a-zA-Z0-9-_]+)(?: (?:ta|tá|esta|está) on.*|$)");
+                        Match nick = Regex.Match(text, "^(?:online|o|a) ([a-zA-Z0-9-_]+)(?: (?:ta|tá|esta|está) on.*|$)", RegexOptions.IgnoreCase);
                         bool isOnline = false;
                         Telegram.SendTypingStatus();
 
-                        foreach (var player in Program.Client.GetOnlinePlayers())
+                        foreach (string player in Program.Client.GetOnlinePlayers())
                         {
 
                             if (player.ToLower().Equals(nick.Groups[1].Value.ToLower()))
@@ -139,7 +242,7 @@ namespace MinecraftClient.HtBot
 
                         if (!isOnline)
                         {
-                            foreach (var player in Program.Client.GetOnlinePlayers())
+                            foreach (string player in Program.Client.GetOnlinePlayers())
                             {
 
                                 if (player.ToLower().Contains(nick.Groups[1].Value.ToLower()))
@@ -156,9 +259,9 @@ namespace MinecraftClient.HtBot
 
                     }
 
-                    if (Regex.IsMatch(text, "^money (.+)"))
+                    if (Regex.IsMatch(text, "^money (.+)", RegexOptions.IgnoreCase))
                     {
-                        Match nick = Regex.Match(text, "^money (.+)");
+                        Match nick = Regex.Match(text, "^money (.+)", RegexOptions.IgnoreCase);
                         Telegram.SendTypingStatus();
 
                         if (nick.Groups[1].Value.Contains(" "))
@@ -188,9 +291,9 @@ namespace MinecraftClient.HtBot
 
                     }
 
-                    if (Regex.IsMatch(text, "^inspect (.+)"))
+                    if (Regex.IsMatch(text, "^inspect (.+)", RegexOptions.IgnoreCase))
                     {
-                        Match nick = Regex.Match(text, "^inspect (.+)");
+                        Match nick = Regex.Match(text, "^inspect (.+)", RegexOptions.IgnoreCase);
                         Telegram.SendTypingStatus();
 
                         if (nick.Groups[1].Value.Contains(" "))
@@ -204,9 +307,9 @@ namespace MinecraftClient.HtBot
 
                     }
 
-                    if (Regex.IsMatch(text, "^mctop (.+)"))
+                    if (Regex.IsMatch(text, "^mctop (.+)", RegexOptions.IgnoreCase))
                     {
-                        Match skill = Regex.Match(text, "^mctop (.+)");
+                        Match skill = Regex.Match(text, "^mctop (.+)", RegexOptions.IgnoreCase);
                         Telegram.SendTypingStatus();
 
                         vars.checkmctop = true;
@@ -215,9 +318,9 @@ namespace MinecraftClient.HtBot
 
                     }
 
-                    if (Regex.IsMatch(text, "^mctop$"))
+                    if (Regex.IsMatch(text, "^mctop$", RegexOptions.IgnoreCase))
                     {
-                        Match skill = Regex.Match(text, "^mctop$");
+                        Match skill = Regex.Match(text, "^mctop$", RegexOptions.IgnoreCase);
                         Telegram.SendTypingStatus();
 
                         vars.checkmctop = true;
@@ -226,7 +329,7 @@ namespace MinecraftClient.HtBot
 
                     }
 
-                    if (Regex.IsMatch(text, "^inspect$"))
+                    if (Regex.IsMatch(text, "^inspect$", RegexOptions.IgnoreCase))
                     {
                         Telegram.SendTypingStatus();
 
@@ -257,7 +360,7 @@ namespace MinecraftClient.HtBot
 
                     }
 
-                    if (Regex.IsMatch(text, "^money$"))
+                    if (Regex.IsMatch(text, "^money$", RegexOptions.IgnoreCase))
                     {
                         Telegram.SendTypingStatus();
 
@@ -286,7 +389,7 @@ namespace MinecraftClient.HtBot
 
                     }
 
-                    if (Regex.IsMatch(text, "^online$"))
+                    if (Regex.IsMatch(text, "^online$", RegexOptions.IgnoreCase))
                     {
                         Telegram.SendTypingStatus();
 
@@ -294,10 +397,10 @@ namespace MinecraftClient.HtBot
 
                     }
 
-                    if (Regex.IsMatch(text, "^verificar (.+)$"))
+                    if (Regex.IsMatch(text, "^verificar (.+)$", RegexOptions.IgnoreCase))
                     {
 
-                        Match match = Regex.Match(text, "^verificar (.+)$");
+                        Match match = Regex.Match(text, "^verificar (.+)$", RegexOptions.IgnoreCase);
                         string nick = match.Groups[1].Value;
                         List<Account> accounts = Telegram.data.GetAccountList(user);
                         Telegram.SendTypingStatus();
@@ -350,10 +453,10 @@ namespace MinecraftClient.HtBot
 
                     }
 
-                    if (Regex.IsMatch(text, "^tell ([A-z0-9_-]{1,16}) (.+)$"))
+                    if (Regex.IsMatch(text, "^tell ([A-z0-9_-]{1,16}) (.+)$", RegexOptions.IgnoreCase))
                     {
 
-                        Match tell = Regex.Match(text, "^tell ([A-z0-9_-]{1,16}) (.+)$");
+                        Match tell = Regex.Match(text, "^tell ([A-z0-9_-]{1,16}) (.+)$", RegexOptions.IgnoreCase);
                         string nick = tell.Groups[1].Value;
                         string msg = tell.Groups[2].Value;
                         List<Account> accounts = Telegram.data.GetAccountList(user);
@@ -434,10 +537,10 @@ namespace MinecraftClient.HtBot
             }
             else
             {
-                if (Regex.IsMatch(text, "^tell ([A-z0-9_-]{1,16}) (.+)$"))
+                if (Regex.IsMatch(text, "^tell ([A-z0-9_-]{1,16}) (.+)$", RegexOptions.IgnoreCase))
                 {
 
-                    Match tell = Regex.Match(text, "^tell ([A-z0-9_-]{1,16}) (.+)$");
+                    Match tell = Regex.Match(text, "^tell ([A-z0-9_-]{1,16}) (.+)$", RegexOptions.IgnoreCase);
                     string nick = tell.Groups[1].Value;
                     string msg = tell.Groups[2].Value;
                     List<Account> accounts = Telegram.data.GetAccountList(user);
