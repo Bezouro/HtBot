@@ -224,7 +224,7 @@ namespace MinecraftClient.HtBot
                 {
                     if (Regex.IsMatch(text, "^online ([a-zA-Z0-9-_]+)$", RegexOptions.IgnoreCase))
                     {
-                        Match nick = Regex.Match(text, "^(?:online|o|a) ([a-zA-Z0-9-_]+)(?: (?:ta|tá|esta|está) on.*|$)", RegexOptions.IgnoreCase);
+                        Match nick = Regex.Match(text, "^online ([a-zA-Z0-9-_]+)$", RegexOptions.IgnoreCase);
                         bool isOnline = false;
                         Telegram.SendTypingStatus();
 
