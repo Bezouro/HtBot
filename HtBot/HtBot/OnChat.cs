@@ -29,8 +29,8 @@ namespace MinecraftClient.HtBot
 
             if (chatclean.Equals("»Bem vindo de volta. Por favor digite /login sua-senha."))
             {
-                ConsoleIO.WriteLine("[Auto-Login] Logando no servidor");
-                Program.Client.SendText("/login 59185555");
+                ConsoleIO.WriteLineFormatted("&4[Auto-Login] &cLogando no servidor");
+                Program.Client.SendText("/login htbot");
                 vars.loggedIn = true;
             }
 
@@ -62,47 +62,111 @@ namespace MinecraftClient.HtBot
 
             if (Regex.IsMatch(chatclean, "^(.+): ([0-9,]+) XP\\((.+)\\/(.+)\\)$"))
             {
+                
                 Match match = Regex.Match(chatclean, "(.+): ([0-9,]+) XP\\((.+)\\/(.+)\\)$");
                 string skill = match.Groups[1].Value;
                 string level = match.Groups[2].Value;
                 string xp1 = match.Groups[3].Value;
                 string xp2 = match.Groups[4].Value;
 
-                switch (skill)
+                if (!vars.singleSkillCheck)
                 {
-                    case "Acrobacia": skill = "🤸🏻‍♂️ (" + skill; break;
-                    case "Reparaçao": skill = "▫️ (" + skill; break;
-                    case "Machado": skill = "⚔️ (" + skill; break;
-                    case "Arqueiro": skill = "🏹 (" + skill; break;
-                    case "Espadas": skill = "⚔️ (" + skill; break;
-                    case "Domar": skill = "🦴 (" + skill; break;
-                    case "Desarmado": skill = "👊🏻 (" + skill; break;
-                    case "Escavaçao": skill = "🥄 (" + skill; break;
-                    case "Pescador": skill = "🐟 (" + skill; break;
-                    case "Herbalismo": skill = "🌿 (" + skill; break;
-                    case "Mineraçao": skill = "⛏ (" + skill; break;
-                    case "Lenhador": skill = "🌳 (" + skill; break;
-                }
-
-                if ((vars.checkSkills)||(vars.checkMultipleSkills))
-                {
-
-                    vars.skills.Add(skill + ")" + " <b>" + level + "</b> [<code>" + xp1 + "/" + xp2 + "</code>]%0A");
-                    vars.skillsList++;
-                    if (!vars.checkMultipleSkills)
+                    switch (skill)
                     {
-                        if (vars.skillsList == 10)
-                        {
-                            response.sendSkills(vars.skills);
-                        }
+                        case "Acrobacia": skill = "🤸🏻‍♂️ (" + skill; break;
+                        case "Reparaçao": skill = "▫️ (" + skill; break;
+                        case "Machado": skill = "⚔️ (" + skill; break;
+                        case "Arqueiro": skill = "🏹 (" + skill; break;
+                        case "Espadas": skill = "⚔️ (" + skill; break;
+                        case "Domar": skill = "🦴 (" + skill; break;
+                        case "Desarmado": skill = "👊🏻 (" + skill; break;
+                        case "Escavaçao": skill = "🥄 (" + skill; break;
+                        case "Pescador": skill = "🐟 (" + skill; break;
+                        case "Herbalismo": skill = "🌿 (" + skill; break;
+                        case "Mineraçao": skill = "⛏ (" + skill; break;
+                        case "Lenhador": skill = "🌳 (" + skill; break;
+                    }
+
+                    bool found = false;
+
+                    List<Account> accounts = Telegram.data.GetAccountList(vars.atualUser);
+                    foreach (Account acc in accounts)
+                    {
+                        if (acc.getNick().ToLower().Equals(vars.atualNick.ToLower())) { found = true; }
+                    }
+
+                    int oldLvl = Telegram.data.skillLevel(vars.atualUser, vars.atualNick, match.Groups[1].Value, int.Parse(level.Replace(",", "")));
+
+                    int diference = int.Parse(level.Replace(",", "")) - oldLvl;
+                    string strdf;
+
+                    if ((diference > 0) && (found))
+                    {
+                        strdf = " ➕ <b>" + diference + "</b>%0A";
                     }
                     else
                     {
-                        if ((vars.checkedskillscount == vars.multipleskillscheck)&&(vars.skillsList == 10))
+                        strdf = "%0A";
+                    }
+
+                    if ((vars.checkSkills) || (vars.checkMultipleSkills))
+                    {
+
+                        vars.skills.Add(skill + ")" + " <b>" + level + "</b> (<code>" + xp1 + "</code>)" + strdf);
+                        vars.skillsList++;
+                        if (!vars.checkMultipleSkills)
+                        {
+                            if (vars.skillsList == 10)
+                            {
+                                response.sendSkills(vars.skills);
+                            }
+                        }
+                        else
+                        {
+                            if ((vars.checkedNicksCount == vars.multipleskillscheck) && (vars.skillsList == 10))
+                            {
+                                vars.skills.Add("====================%0A" + vars.emjinfo + " Em breve este comando vai parar de funcionar%0AUse <code>/nomedaskill</code> no lugar,%0AExemplo <b>/pescador</b> %0Aou <code>/inspect nick</code>");
+                                response.sendSkills(vars.skills);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+
+                    if (vars.checkingSkill.ToLower().Equals(skill.ToLower()))
+                    {
+
+                        bool found = false;
+
+                        List<Account> accounts = Telegram.data.GetAccountList(vars.atualUser);
+                        foreach (Account acc in accounts)
+                        {
+                            if (acc.getNick().ToLower().Equals(vars.atualNick.ToLower())) { found = true; }
+                        }
+
+                        int oldLvl = Telegram.data.skillLevel(vars.atualUser, vars.atualNick, skill, int.Parse(level.Replace(",", "")));
+                        int diference = int.Parse(level.Replace(",", "")) - oldLvl;
+                        string strdf;
+                        if ((diference > 0) && (found))
+                        {
+                            strdf = " ➕ <b>" + diference + "</b>%0A";
+                        }
+                        else
+                        {
+                            strdf = "%0A";
+                        }
+
+                        vars.skills.Add(vars.atualNick + ")" + " <b>" + level + "</b> (<code>" + xp1 + "</code>)" + strdf);
+                        vars.skillsList++;
+
+                        if (vars.skillsList == vars.multipleskillscheck)
                         {
                             response.sendSkills(vars.skills);
                         }
+
                     }
+
                 }
             }
 
@@ -158,21 +222,28 @@ namespace MinecraftClient.HtBot
             if (Regex.IsMatch(chatclean, "^Skills do player (.+)$"))
             {
                 Match match = Regex.Match(chatclean, "^Skills do player (.+)$");
+                vars.atualNick = match.Groups[1].Value;
 
-                if (vars.checkSkills)
+                if (!vars.singleSkillCheck)
                 {
-                    vars.skills.Clear();
-                    vars.skillsList = 0;
-                    vars.skills.Add("Essas são as skills de <code>" + match.Groups[1].Value + "</code> :%0A════════════════════%0A");
-                }
-                if (vars.checkMultipleSkills) {
-                    vars.checkedskillscount++;
-                    vars.skillsList = 0;
-                    if (vars.checkedskillscount > 1) {
-                        vars.skills.Add("%0A");
+                    if (vars.checkSkills)
+                    {
+                        vars.skills.Clear();
+                        vars.skillsList = 0;
+                        vars.skills.Add("Essas são as skills de <code>" + match.Groups[1].Value + "</code> :%0A════════════════════%0A");
                     }
-                    vars.skills.Add("Essas são as skills de <code>" + match.Groups[1].Value + "</code> :%0A════════════════════%0A");
+                    if (vars.checkMultipleSkills)
+                    {
+                        vars.checkedNicksCount++;
+                        vars.skillsList = 0;
+                        if (vars.checkedNicksCount > 1)
+                        {
+                            vars.skills.Add("%0A");
+                        }
+                        vars.skills.Add("Essas são as skills de <code>" + match.Groups[1].Value + "</code> :%0A════════════════════%0A");
+                    }
                 }
+                
             }
 
             if (Regex.IsMatch(chatclean, "^--CraftLandia--$"))

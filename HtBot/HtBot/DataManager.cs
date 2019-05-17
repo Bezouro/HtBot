@@ -466,7 +466,7 @@ namespace MinecraftClient.HtBot
 
         }
 
-        public int skillLevel(int user, string Acc, string skill, bool change = false, int newLevel = 0)
+        public int skillLevel(int user, string Acc, string skill, int newLevel)
         {
 
             try
@@ -488,12 +488,8 @@ namespace MinecraftClient.HtBot
 
                             if (account.ToLower().Equals(Acc.ToLower()))
                             {
-                                int retVal = lvl;
-                                if (change)
-                                {
-                                    parsingAccount[skill] = newLevel;
-                                    WriteData();
-                                }
+                                parsingAccount[skill] = newLevel;
+                                WriteData();
                                 return lvl;
                             }
                             
@@ -1142,7 +1138,7 @@ namespace MinecraftClient.HtBot
             DateTime origin = new DateTime(1970, 1, 1);
             if (timestamp == 0)
             {
-                return " ---";
+                return "---";
             }
             return origin.AddSeconds(timestamp).ToLocalTime().ToString("dd/MM HH:mm:ss");
         }

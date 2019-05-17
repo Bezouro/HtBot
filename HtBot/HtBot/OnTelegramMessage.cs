@@ -293,8 +293,11 @@ namespace MinecraftClient.HtBot
 
                     if (Regex.IsMatch(text, "^inspect (.+)", RegexOptions.IgnoreCase))
                     {
+                        vars.resetVars();
                         Match nick = Regex.Match(text, "^inspect (.+)", RegexOptions.IgnoreCase);
                         Telegram.SendTypingStatus();
+
+                        vars.atualUser = user;
 
                         if (nick.Groups[1].Value.Contains(" "))
                         {
@@ -329,16 +332,55 @@ namespace MinecraftClient.HtBot
 
                     }
 
+                    if (Regex.IsMatch(text, "^(Acrobacia|Reparaçao|Machado|Arqueiro|Espadas|Domar|Desarmado|Escavaçao|Pescador|Herbalismo|Mineraçao|Lenhador)$", RegexOptions.IgnoreCase))
+                    {
+                        Match skill = Regex.Match(text, "^(Acrobacia|Reparaçao|Machado|Arqueiro|Espadas|Domar|Desarmado|Escavaçao|Pescador|Herbalismo|Mineraçao|Lenhador)$", RegexOptions.IgnoreCase);
+                        string Skill = skill.Groups[1].Value;
+
+                        vars.resetVars();
+
+                        List<Account> accounts = Telegram.data.GetAccountList(user);
+                        vars.checkingSkill = Skill;
+                        vars.singleSkillCheck = true;
+                        vars.atualUser = user;
+                        vars.multipleskillscheck = accounts.Count;
+                        vars.checkedNicksCount = 0;
+
+                        Telegram.SendTypingStatus();
+
+                        vars.skills.Add("Skill: <code>" + vars.checkingSkill + "</code> :%0A════════════════════%0A");
+
+                        if (accounts.Count > 0)
+                        {
+                            foreach (Account account in accounts)
+                            {
+                                string acc = account.getNick();
+                                wait(500);
+                                Program.Client.SendText("/inspect " + acc);
+                                wait(500);
+                            }
+                        }
+                        else
+                        {
+                            Telegram.SendHtmlMessage(vars.emjerror + " Antes de usar esse comando %0AUse /add <code>nick</code> para adicionar suas contas!");
+                        }
+
+
+                    }
+
                     if (Regex.IsMatch(text, "^inspect$", RegexOptions.IgnoreCase))
                     {
                         Telegram.SendTypingStatus();
 
+                        vars.resetVars();
+
                         vars.checkMultipleSkills = true;
+                        vars.atualUser = user;
 
                         List<Account> accounts = Telegram.data.GetAccountList(user);
 
                         vars.multipleskillscheck = accounts.Count;
-                        vars.checkedskillscount = 0;
+                        vars.checkedNicksCount = 0;
 
                         ConsoleIO.WriteLine(accounts.Count + "");
 
