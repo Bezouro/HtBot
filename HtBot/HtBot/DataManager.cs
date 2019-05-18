@@ -131,6 +131,9 @@ namespace MinecraftClient.HtBot
                 JArray treasures = new JArray();
                 JArray notifications = new JArray();
                 JToken verified = false;
+                JToken protect = false;
+                JToken login_verified = false;
+                JToken can_login = false;
                 JToken limitresponse = getTimestamp();
                 JToken token = random.Next(1000, 9999);
                 JToken last_online = random.Next(1000, 9999);
@@ -150,6 +153,9 @@ namespace MinecraftClient.HtBot
                 jsona.Add("treasures", treasures);
                 jsona.Add("notifications", notifications);
                 jsona.Add("verified", verified);
+                jsona.Add("protect", protect);
+                jsona.Add("login_verified", protect);
+                jsona.Add("can_login", can_login);
                 jsona.Add("limitresponse", limitresponse);
                 jsona.Add("token", token);
                 jsona.Add("last_online", last_online);
@@ -291,6 +297,251 @@ namespace MinecraftClient.HtBot
 
         }
 
+        public string GetProtectedAccounts(int user)
+        {
+            try
+            {
+                bool found = false;
+                string reply = null;
+
+                foreach (var theUser in users)
+                {
+                    JObject User = JObject.Parse(theUser.ToString());
+
+                    if ((int)User.GetValue("user_id") == user)
+                    {
+                        JArray accounts = (JArray)User.GetValue("user_accounts");
+                        foreach (JToken acc in accounts)
+                        {
+                            string conta = (string)acc["nick"];
+                            bool Protected = Convert.ToBoolean(acc["protect"]);
+
+                            if (!found)
+                            {
+                                if (conta != null)
+                                {
+                                    found = true;
+                                }
+                            }
+
+                            string verify = "";
+
+                            if (Protected)
+                            {
+                                verify = "🔐";
+                            }
+                            else
+                            {
+                                verify = "🔓";
+                            }
+
+                            string nick = verify + " <code>" + conta + "</code>";
+                            reply = reply + nick + "%0A";
+                        }
+
+                    }
+
+                }
+
+                if (found)
+                {
+                    return reply;
+                }
+                else
+                {
+                    return "-1";
+                }
+            }
+            catch (Exception e)
+            {
+                ConsoleIO.WriteLineFormatted(e.ToString());
+                return "-1";
+            }
+
+        }
+
+        public bool Protect(string nick, bool toggle = false, bool Protect = false, int id = 0)
+        {
+
+            try
+            {
+                int count = 0;
+                foreach (var zzz in users)
+                {
+                    JObject theUser = (JObject)users[count];
+                    JArray accounts = (JArray)theUser["user_accounts"];
+                    int Id = (int)theUser["user_id"];
+                    int count2 = 0;
+
+                    foreach (var aaa in accounts)
+                    {
+                        JObject parsingAccount = (JObject)accounts[count2];
+                        string Nick = parsingAccount["nick"].ToString();
+
+                        if (Nick.ToLower().Equals(nick.ToLower()))
+                        {
+                            bool verified = Convert.ToBoolean(parsingAccount["verified"]);
+                            bool protect = Convert.ToBoolean(parsingAccount["protect"]);
+                            if (toggle)
+                            {
+                                ConsoleIO.WriteLine("[Protect] toggle = " + toggle);
+
+                                if (Id == id)
+                                {
+
+                                    ConsoleIO.WriteLine("[Protect] id ok");
+
+                                    if (verified)
+                                    {
+
+                                        ConsoleIO.WriteLine("[Protect] verified = " + verified);
+                                        ConsoleIO.WriteLine("[Protect] setando valor " + Protect);
+                                        parsingAccount["protect"] = Protect;
+                                        ConsoleIO.WriteLine("[Protect] novo valor: " + parsingAccount["protect"]);
+                                        WriteData();
+                                        Telegram.SendHtmlMessage(vars.emjok + " Protect alterado para esta conta!");
+                                        return true;
+                                    }
+                                    else
+                                    {
+                                        ConsoleIO.WriteLine("[Protect] verified = " + verified);
+                                        Telegram.SendHtmlMessage(vars.emjerror + " Desculpe, para usar este comando você precisa comprovar que é dono desda conta%0A" +
+                                            "Para isso, use <code>/verificar " + Nick + "</code>");
+                                        return false;
+                                    }
+                                }
+                                else
+                                {
+                                    ConsoleIO.WriteLine("[Protect] id = errado");
+                                    break;
+                                }
+
+                            }
+                            else
+                            {
+                                if (protect)
+                                {
+                                    return true;
+                                }
+                            }
+                            
+                            break;
+                        }
+                        count2++;
+                    }
+                    count++;
+                }
+
+                return false;
+
+            }
+            catch (Exception e)
+            {
+                ConsoleIO.WriteLineFormatted(e.ToString());
+                return false;
+            }
+        }
+
+        public bool login(string nick, bool toggle = false, bool canlogin = false, bool logged = false)
+        {
+
+            try
+            {
+                int count = 0;
+                foreach (var zzz in users)
+                {
+                    JObject theUser = (JObject)users[count];
+                    JArray accounts = (JArray)theUser["user_accounts"];
+                    int count2 = 0;
+
+                    foreach (var aaa in accounts)
+                    {
+                        JObject parsingAccount = (JObject)accounts[count2];
+                        string Nick = parsingAccount["nick"].ToString();
+
+                        if (Nick.ToLower().Equals(nick.ToLower()))
+                        {
+                            bool verified = Convert.ToBoolean(parsingAccount["verified"]);
+                            bool protect = Convert.ToBoolean(parsingAccount["protect"]);
+                            bool Logged = Convert.ToBoolean(parsingAccount["login_verified"]);
+                            if (protect)
+                            {
+
+                                if (toggle)
+                                {
+                                    parsingAccount["login_verified"] = logged;
+                                    parsingAccount["can_login"] = canlogin;
+                                }
+                                else
+                                {
+                                    return Logged;
+                                }
+
+                            }
+
+                            break;
+                        }
+                        count2++;
+                    }
+                    count++;
+                }
+
+                return false;
+
+            }
+            catch (Exception e)
+            {
+                ConsoleIO.WriteLineFormatted(e.ToString());
+                return false;
+            }
+        }
+
+        public List<int> getTokenProtected(string nick)
+        {
+
+            List<int> tokens = new List<int>();
+
+            try
+            {
+                int count = 0;
+                foreach (var zzz in users)
+                {
+                    JObject theUser = (JObject)users[count];
+                    JArray accounts = (JArray)theUser["user_accounts"];
+                    int count2 = 0;
+
+                    foreach (var aaa in accounts)
+                    {
+                        JObject parsingAccount = (JObject)accounts[count2];
+                        string Nick = parsingAccount["nick"].ToString();
+
+                        if (Nick.ToLower().Equals(nick.ToLower()))
+                        {
+                            bool protect = Convert.ToBoolean(parsingAccount["protect"]);
+                            int token = (int)parsingAccount["token"];
+                            if (protect)
+                            {
+
+                                tokens.Add(token);
+
+                            }
+
+                            break;
+                        }
+                        count2++;
+                    }
+                    count++;
+                }
+
+                return tokens;
+
+            }
+            catch (Exception e)
+            {
+                ConsoleIO.WriteLineFormatted(e.ToString());
+                return null;
+            }
+        }
 
         public bool Verify(string Account, int Token)
         {
@@ -418,6 +669,44 @@ namespace MinecraftClient.HtBot
             }
 
             return 0;
+
+        }
+
+        public string getNickFromToken(int Token)
+        {
+            try
+            {
+                int count = 0;
+                foreach (var zzz in users)
+                {
+                    JObject theUser = (JObject)users[count];
+                    JArray accounts = (JArray)theUser["user_accounts"];
+                    int count2 = 0;
+
+                    foreach (var aaa in accounts)
+                    {
+                        JObject parsingAccount = (JObject)accounts[count2];
+                        string account = parsingAccount["nick"].ToString();
+                        int token = (int)parsingAccount["token"];
+
+                        if (token == Token)
+                        {
+                            return account;
+                        }
+
+                        count2++;
+                    }
+                    count++;
+                }
+
+            }
+            catch (Exception e)
+            {
+                ConsoleIO.WriteLineFormatted(e.ToString());
+                return null;
+            }
+
+            return null;
 
         }
 
@@ -709,7 +998,6 @@ namespace MinecraftClient.HtBot
                     {
                         JObject parsingAccount = (JObject)accounts[count2];
                         string Nick = parsingAccount["nick"].ToString();
-                        //ConsoleIO.WriteLineFormatted(nick + "->" + Nick);
 
                         if (Nick.ToLower().Equals(nick.ToLower()))
                         {

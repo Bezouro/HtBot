@@ -127,7 +127,7 @@ namespace MinecraftClient.HtBot
                 {
                     if (fromgroup)
                     {
-                        SendHtmlMessage(vars.emjerror + " Por favor antes disso me envie uma mensagem privada!%0A<a href=\"tg://user?id=683734351\">Toque aqui</a>");
+                        SendHtmlMessage(vars.emjerror + " Por favor antes disso me envie uma mensagem privada!%0A<a href=\"tg://user?id=656836377\">Toque aqui</a>");
                     }
                     return false;
                 }
@@ -135,7 +135,7 @@ namespace MinecraftClient.HtBot
                 {
                     if (fromgroup)
                     {
-                        SendHtmlMessage(vars.emjerror + " Por favor antes disso me envie uma mensagem privada!%0A<a href=\"tg://user?id=683734351\">Toque aqui</a>");
+                        SendHtmlMessage(vars.emjerror + " Por favor antes disso me envie uma mensagem privada!%0A<a href=\"tg://user?id=656836377\">Toque aqui</a>");
                     }
                     return false;
                 }
@@ -378,7 +378,7 @@ namespace MinecraftClient.HtBot
                             }
                         }
 
-                        if (true)
+                        if (telegramDebug)
                         {
                             ConsoleIO.WriteLineFormatted("");
                             ConsoleIO.WriteLineFormatted("");

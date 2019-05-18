@@ -152,6 +152,13 @@ namespace MinecraftClient.HtBot
             else { Telegram.SendHtmlMessage("Suas contas: %0A════════════════════%0A" + accs + Notification); }
         }
 
+        public void sendProtectedNicknames(int user)
+        {
+            string accs = Telegram.data.GetProtectedAccounts(user);
+            if (accs.Equals("-1")) { Telegram.SendHtmlMessage(vars.emjerror + "<b>Você não tem contas cadastradas!</b>"); }
+            else { Telegram.SendHtmlMessage("🛡HtBot Protect🛡%0A════════════════════%0A" + accs); }
+        }
+
         public void sendOnlineNicknames(int user)
         {
             string accs = Telegram.data.GetOnlineAccounts(user);
@@ -301,6 +308,19 @@ namespace MinecraftClient.HtBot
             }
             Telegram.SendHtmlMessage(msg);
             vars.checkmctop = false;
+        }
+
+        public void sendmcrank(List<string> mcrank)
+        {
+            Telegram.SendTypingStatus();
+            string msg = null;
+
+            foreach (string content in mcrank)
+            {
+                msg = msg + content;
+            }
+            Telegram.SendHtmlMessage(msg);
+            vars.checkmcrank = false;
         }
 
     }

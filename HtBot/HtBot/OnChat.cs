@@ -3,6 +3,7 @@ using MinecraftClient.Protocol;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace MinecraftClient.HtBot
@@ -26,6 +27,16 @@ namespace MinecraftClient.HtBot
             String chat = text;
             String chatclean = GetVerbatim(text);
             //wConsole.process(chat);
+
+            if (Regex.IsMatch(chatclean, "^\\[WITHER\\] Finalmente livre! Prepare-se para enfrentar a morte!$",RegexOptions.IgnoreCase))
+            {
+                Telegram.SendPrivateMessage(816833078, "O Wither acaba de spawnar");
+            }
+
+            if (Regex.IsMatch(chatclean, "^\\[ENDER DRAGON\\] Estou de volta para dominar a todos!!!$", RegexOptions.IgnoreCase))
+            {
+                Telegram.SendPrivateMessage(816833078, "O Ender Dragon acaba de spawnar");
+            }
 
             if (chatclean.Equals("»Bem vindo de volta. Por favor digite /login sua-senha."))
             {
@@ -125,7 +136,7 @@ namespace MinecraftClient.HtBot
                         {
                             if ((vars.checkedNicksCount == vars.multipleskillscheck) && (vars.skillsList == 10))
                             {
-                                vars.skills.Add("====================%0A" + vars.emjinfo + " Em breve este comando vai parar de funcionar%0AUse <code>/nomedaskill</code> no lugar,%0AExemplo <b>/pescador</b> %0Aou <code>/inspect nick</code>");
+                                vars.skills.Add("════════════════════%0A" + vars.emjinfo + " Este comando será desativado automaticamente Amanhã (18/05/19)%0AComo alternativa use <code>/nomedaskill</code>,%0AExemplo <b>/pescador</b> %0Aou <code>/inspect nick</code>");
                                 response.sendSkills(vars.skills);
                             }
                         }
@@ -167,6 +178,36 @@ namespace MinecraftClient.HtBot
 
                     }
 
+                }
+            }
+
+            if (Regex.IsMatch(chatclean, "^. Aguarde para utilizar esse comando novamente!$"))
+            {
+                if (vars.checkmctop)
+                {
+                    Telegram.SendHtmlMessage(vars.emjneutralface + " Por favor, aguarde um pouco antes de usar este comando novamente!");
+                }
+            }
+
+            if (Regex.IsMatch(chatclean, "^Player nao encontrado no banco de dados!$"))
+            {
+                if ((vars.checkSkills)||(vars.checkmcrank))
+                {
+                    Telegram.SendHtmlMessage(vars.emjneutralface + " Ops, Aparentemente essa conta nao existe no servidor, Verifique o nick e tente novamente!");
+                }
+            }
+
+            if (Regex.IsMatch(chatclean, "^. Não existe um jogador com o nick (.+)\\.$",RegexOptions.IgnoreCase))
+            {
+                Match match = Regex.Match(chatclean, "^. Não existe um jogador com o nick (.+)\\.$",RegexOptions.IgnoreCase);
+                Telegram.SendHtmlMessage(vars.emjneutralface + " Ops, Aparentemente a conta " + match.Groups[1].Value + " não existe no servidor, Verifique o nick e tente novamente!");
+            }
+
+            if (Regex.IsMatch(chatclean, "^Skill inexistente, veja se digitou corretamente!$"))
+            {
+                if ((vars.checkSkills)||(vars.checkmctop))
+                {
+                    Telegram.SendHtmlMessage(vars.emjneutralface + " Ops, Aparentemente essa skill nao existe no servidor, Verifique e tente novamente!");
                 }
             }
 
@@ -244,6 +285,41 @@ namespace MinecraftClient.HtBot
                     }
                 }
                 
+            }
+
+            if (Regex.IsMatch(chatclean, "^(Acrobacia|Arqueiro|Machado|Escavaçao|Pescador|Herbalismo|Mineraçao|Reparaçao|Espadas|Lenhador|Global) - Posiçao #([0-9,]{1,6})$"))
+            {
+                Match match = Regex.Match(chatclean, "^(Acrobacia|Arqueiro|Machado|Escavaçao|Pescador|Herbalismo|Mineraçao|Reparaçao|Espadas|Lenhador|Global) - Posiçao #([0-9,]{1,6})$");
+                string skill = match.Groups[1].Value;
+                int pos = int.Parse(match.Groups[2].Value.Replace(",",""));
+
+                if (vars.checkmcrank)
+                {
+                    string strpos;
+
+                    switch (pos)
+                    {
+                        case 1: strpos = "🥇"; break;
+                        case 2: strpos = "🥈"; break;
+                        case 3: strpos = "🥉"; break;
+                        default: strpos = pos.ToString(); break;
+                    }
+                    
+                    vars.mcrank.Add(skill + " (" + strpos + ")%0A");
+                    if (skill.ToLower().Equals("global"))
+                    {
+                        response.sendmcrank(vars.mcrank);
+                    }
+                }
+            }
+
+            if (Regex.IsMatch(chatclean, "^-=RANKING DE SKILLS=-$"))
+            {
+                if (vars.checkmcrank)
+                {
+                    vars.mcrank.Clear();
+                    vars.mcrank.Add("Posição de: <code>" + vars.atualNick + "</code> no Ranking de skills:%0A════════════════════%0A");
+                }
             }
 
             if (Regex.IsMatch(chatclean, "^--CraftLandia--$"))
@@ -427,6 +503,42 @@ namespace MinecraftClient.HtBot
                 else
                 {
                     Program.Client.SendText("/tell " + Sender + " Token invalido");
+                }
+
+            }
+
+            if (Regex.IsMatch(chatclean, "^\\(Mensagem de (.+)\\): (\\d{4})$"))
+            {
+                Match resposta = Regex.Match(chatclean, "^\\(Mensagem de (.+)\\): (\\d{4})$");
+                string Sender = resposta.Groups[1].Value;
+                int Token = int.Parse(resposta.Groups[2].Value);
+
+
+                bool mathToken = Telegram.data.mathToken(Sender, Token);
+                string loggednick = Telegram.data.getNickFromToken(Token);
+
+                if (Telegram.data.Protect(Sender))
+                {
+                    if (mathToken)
+                    {
+                        Program.Client.SendText("/tell " + Sender + " Bem vindo " + Sender);
+                        Telegram.data.login(Sender, true, false, true);
+                    }
+                    else
+                    {
+                        new Thread(new ThreadStart(delegate
+                        {
+                            System.Threading.Thread.Sleep(2000);
+                            Program.Client.SendText("/tell " + Sender + " [Protect] ola " + loggednick + ", o " + Sender + " foi avisado do seu login!");
+                            Telegram.data.login(Sender, true, false, true);
+                            List<int> tokens = Telegram.data.getTokenProtected(Sender);
+                            foreach (int token in tokens)
+                            {
+                                Telegram.data.addNotification(Sender, loggednick + " Acessou sua conta", true, token);
+                            }
+                        })).Start();
+                        
+                    }
                 }
 
             }

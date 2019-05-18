@@ -7,12 +7,18 @@ namespace MinecraftClient.HtBot
 {
     class vars
     {
+        public static long logInTimestamp = 0;
         public static bool loggedIn = false;
+
+
+
+
         public static bool tmoney;
         public static bool checkSkills;
         public static bool checkMultipleSkills;
         public static bool checkMultipleMoney;
         public static bool checkmctop;
+        public static bool checkmcrank;
         public static bool checkMoneyRank;
         public static bool sendWM;
         public static bool singleSkillCheck;
@@ -54,6 +60,8 @@ namespace MinecraftClient.HtBot
 
         public static List<string> mctop = new List<string>();
         public static int mcTopList = 0;
+
+        public static List<string> mcrank = new List<string>();
 
         public static void resetVars()
         {

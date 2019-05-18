@@ -11,6 +11,7 @@ using MinecraftClient.Proxy;
 using MinecraftClient.Protocol.Handlers.Forge;
 using MinecraftClient.Mapping;
 using MinecraftClient.HtBot;
+using HtBot.HtBot;
 
 namespace MinecraftClient
 {
@@ -609,7 +610,11 @@ namespace MinecraftClient
             if (!ChatBot.IsValidName(name))
                 return;
 
-            Telegram.data.loginData(name, "last_online", Telegram.data.getTimestamp());
+            if (Telegram.data.getTimestamp() > vars.logInTimestamp)
+            {
+                Telegram.data.loginData(name, "last_online", Telegram.data.getTimestamp());
+                OnLogin.Protect(name);
+            }
 
             lock (onlinePlayers)
             {

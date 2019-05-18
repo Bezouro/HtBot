@@ -83,6 +83,11 @@ namespace MinecraftClient.HtBot
                     response.sendTreasures(user);
                 }
 
+                if (text.ToLower().Equals("link"))
+                {
+                    Telegram.SendHtmlMessage(vars.emjinfo + " Link do grupo:%0Ahttps://t.me/joinchat/IcsdwkZ2PD3HdWCJCunNGQ");
+                }
+
                 if (text.ToLower().Equals("mensagens"))
                 {
                     response.sendNotifications(user);
@@ -187,6 +192,23 @@ namespace MinecraftClient.HtBot
                     {
                         Telegram.SendHtmlMessage(vars.emjerror + " Apenas Admins podem usar este comando!");
                     }
+
+                }
+
+                if (Regex.IsMatch(text, "^protect$", RegexOptions.IgnoreCase))
+                {
+                    response.sendProtectedNicknames(user);
+                }
+
+                if (Regex.IsMatch(text, "^protect (.+) (on|off)$", RegexOptions.IgnoreCase))
+                {
+                    Match match = Regex.Match(text, "^protect (.+) (on|off)$", RegexOptions.IgnoreCase);
+                    string name = match.Groups[1].Value;
+                    bool protect = match.Groups[2].Value.ToLower().Equals("on");
+
+                    Telegram.SendTypingStatus();
+
+                    Telegram.data.Protect(name, true, protect, user);
 
                 }
 
@@ -332,6 +354,17 @@ namespace MinecraftClient.HtBot
 
                     }
 
+                    if (Regex.IsMatch(text, "^mcrank (.+)", RegexOptions.IgnoreCase))
+                    {
+                        Match check = Regex.Match(text, "^mcrank (.+)", RegexOptions.IgnoreCase);
+                        Telegram.SendTypingStatus();
+
+                        vars.checkmcrank = true;
+                        Program.Client.SendText("/mcrank " + check.Groups[1].Value);
+                        vars.atualNick = check.Groups[1].Value;
+
+                    }
+
                     if (Regex.IsMatch(text, "^(Acrobacia|Reparaçao|Machado|Arqueiro|Espadas|Domar|Desarmado|Escavaçao|Pescador|Herbalismo|Mineraçao|Lenhador)$", RegexOptions.IgnoreCase))
                     {
                         Match skill = Regex.Match(text, "^(Acrobacia|Reparaçao|Machado|Arqueiro|Espadas|Domar|Desarmado|Escavaçao|Pescador|Herbalismo|Mineraçao|Lenhador)$", RegexOptions.IgnoreCase);
@@ -381,22 +414,27 @@ namespace MinecraftClient.HtBot
 
                         vars.multipleskillscheck = accounts.Count;
                         vars.checkedNicksCount = 0;
-
-                        ConsoleIO.WriteLine(accounts.Count + "");
-
-                        if (accounts.Count > 0)
+                        if (Telegram.data.getTimestamp() < 1558148400)
                         {
-                            foreach (Account account in accounts)
+
+                            if (accounts.Count > 0)
                             {
-                                string acc = account.getNick();
-                                wait(500);
-                                Program.Client.SendText("/inspect " + acc);
-                                wait(500);
+                                foreach (Account account in accounts)
+                                {
+                                    string acc = account.getNick();
+                                    wait(500);
+                                    Program.Client.SendText("/inspect " + acc);
+                                    wait(500);
+                                }
+                            }
+                            else
+                            {
+                                Telegram.SendHtmlMessage(vars.emjerror + " Antes de usar esse comando %0AUse /add <code>nick</code> para adicionar suas contas!");
                             }
                         }
                         else
                         {
-                            Telegram.SendHtmlMessage(vars.emjerror + " Antes de usar esse comando %0AUse /add <code>nick</code> para adicionar suas contas!");
+                            Telegram.SendHtmlMessage(vars.emjerror + " Este comando está obsoleto e foi descontinuado!%0AComo alternativa teste /nomedaskill%0AExemplo: /pescador");
                         }
 
 

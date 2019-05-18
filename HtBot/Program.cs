@@ -166,6 +166,9 @@ namespace MinecraftClient
         /// </summary>
         private static void InitializeClient()
         {
+
+            vars.logInTimestamp = Telegram.data.getTimestamp() + 60;
+
             SessionToken session = new SessionToken();
 
             ProtocolHandler.LoginResult result = ProtocolHandler.LoginResult.LoginRequired;
