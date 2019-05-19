@@ -1,6 +1,8 @@
 ﻿using HtBot.HtBot;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace MinecraftClient.HtBot
@@ -214,8 +216,6 @@ namespace MinecraftClient.HtBot
 
                 if (Regex.IsMatch(text, "^reconectar$", RegexOptions.IgnoreCase))
                 {
-                    Match match = Regex.Match(text, "^reconectar$", RegexOptions.IgnoreCase);
-
                     Telegram.SendTypingStatus();
 
                     if (Telegram.isAdmin(user))
@@ -223,8 +223,42 @@ namespace MinecraftClient.HtBot
                         Admin adm = Telegram.getAdmin(user);
                         if (adm.canPromoteMembers())
                         {
+                            Program.Client.SendText("/ativar reiniciandohtbot");
                             Program.Restart();
                             Telegram.SendHtmlMessage(vars.emjok + " Reconectando ao servidor!");
+                        }
+                        else
+                        {
+                            Telegram.SendHtmlMessage(vars.emjerror + " Desculpe, você não tem permissão para isso!");
+                        }
+                    }
+                    else
+                    {
+                        Telegram.SendHtmlMessage(vars.emjerror + " Apenas Admins podem usar este comando!");
+                    }
+                }
+
+                if (Regex.IsMatch(text, "^reiniciar$", RegexOptions.IgnoreCase))
+                {
+                    Telegram.SendTypingStatus();
+
+                    if (Telegram.isAdmin(user))
+                    {
+                        Admin adm = Telegram.getAdmin(user);
+                        if (adm.canPromoteMembers())
+                        {
+
+                            new Thread(new ThreadStart(delegate
+                            {
+                                
+                                Telegram.SendHtmlMessage(vars.emjok + " Reiniciando o bot!");
+                                Program.Client.SendText("/ativar reiniciandohtbot");
+                                Thread.Sleep(2000);
+                                Environment.Exit(0);
+
+                            })).Start();
+
+                            
                         }
                         else
                         {

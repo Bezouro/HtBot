@@ -529,13 +529,24 @@ namespace MinecraftClient.HtBot
                         new Thread(new ThreadStart(delegate
                         {
                             System.Threading.Thread.Sleep(2000);
-                            Program.Client.SendText("/tell " + Sender + " [Protect] ola " + loggednick + ", o " + Sender + " foi avisado do seu login!");
-                            Telegram.data.login(Sender, true, false, true);
-                            List<int> tokens = Telegram.data.getTokenProtected(Sender);
-                            foreach (int token in tokens)
+                            if (Telegram.data.canLogin(Sender))
                             {
-                                Telegram.data.addNotification(Sender, loggednick + " Acessou sua conta", true, token);
+                                if (loggednick != null)
+                                {
+                                    Program.Client.SendText("/tell " + Sender + " [Protect] ola " + loggednick + ", o " + Sender + " foi avisado do seu login!");
+                                    Telegram.data.login(Sender, true, false, true);
+                                    List<int> tokens = Telegram.data.getTokenProtected(Sender);
+                                    foreach (int token in tokens)
+                                    {
+                                        Telegram.data.addNotification(Sender, loggednick + " Acessou sua conta", true, token);
+                                    }
+                                }
+                                else
+                                {
+                                    Program.Client.SendText("/tell " + Sender + " [Protect] Token invalido!");
+                                }
                             }
+                            
                         })).Start();
                         
                     }

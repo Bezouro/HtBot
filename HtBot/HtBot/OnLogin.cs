@@ -16,7 +16,7 @@ namespace HtBot.HtBot
             {
                 new Thread(new ThreadStart(delegate
                 {
-                    System.Threading.Thread.Sleep(1500);
+                    System.Threading.Thread.Sleep(5000);
                     Telegram.data.login(nick, true, true);
                     Program.Client.SendText("/tell " + nick + " [Protect] Ola " + nick + ", voce tem 10s para enviar seu token");
                     System.Threading.Thread.Sleep(11000);

@@ -464,19 +464,72 @@ namespace MinecraftClient.HtBot
                             bool verified = Convert.ToBoolean(parsingAccount["verified"]);
                             bool protect = Convert.ToBoolean(parsingAccount["protect"]);
                             bool Logged = Convert.ToBoolean(parsingAccount["login_verified"]);
+                            bool cLogin = Convert.ToBoolean(parsingAccount["can_login"]);
+
                             if (protect)
                             {
 
                                 if (toggle)
                                 {
+                                    if ((!cLogin)&&(logged))
+                                    {
+                                        return false;
+                                    }
+                                    
                                     parsingAccount["login_verified"] = logged;
                                     parsingAccount["can_login"] = canlogin;
+                                    
+                                    
                                 }
                                 else
                                 {
                                     return Logged;
                                 }
 
+                            }
+
+                            break;
+                        }
+                        count2++;
+                    }
+                    count++;
+                }
+
+                return false;
+
+            }
+            catch (Exception e)
+            {
+                ConsoleIO.WriteLineFormatted(e.ToString());
+                return false;
+            }
+        }
+
+        public bool canLogin(string nick)
+        {
+
+            try
+            {
+                int count = 0;
+                foreach (var zzz in users)
+                {
+                    JObject theUser = (JObject)users[count];
+                    JArray accounts = (JArray)theUser["user_accounts"];
+                    int count2 = 0;
+
+                    foreach (var aaa in accounts)
+                    {
+                        JObject parsingAccount = (JObject)accounts[count2];
+                        string Nick = parsingAccount["nick"].ToString();
+
+                        if (Nick.ToLower().Equals(nick.ToLower()))
+                        {
+                            bool protect = Convert.ToBoolean(parsingAccount["protect"]);
+                            bool cLogin = Convert.ToBoolean(parsingAccount["can_login"]);
+
+                            if (protect)
+                            {
+                                return cLogin;
                             }
 
                             break;
